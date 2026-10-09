@@ -146,3 +146,33 @@ test('cold requests return loading immediately while refresh continues', async (
   assert.equal(result.weather.temperature, 10.1);
   await provider.stop();
 });
+
+test('custom locality and coordinates share the same forecast cache', async () => {
+  const provider = new MeteoSwissProvider({
+    http: fixtureHttp(),
+    cacheDir: null,
+    now: () => NOW,
+    logger: silent,
+  });
+  const queries = [];
+  provider.locations.find = async (query) => {
+    queries.push(query);
+    return point;
+  };
+  provider.locations.nearest = async () => point;
+  await assert.rejects(provider.get({ location: 'Lausanne' }), /loading/);
+  await provider.pending;
+  const byName = await provider.get({ location: 'Lausanne' });
+  const byHouse = await provider.get({ latitude: point.latitude, longitude: point.longitude });
+  assert.deepEqual(byName, byHouse);
+  assert.equal(provider.targets.size, 1);
+  assert.deepEqual(queries, ['Lausanne', 'Lausanne']);
+  provider.locations.find = async () => {
+    throw new Error('unknownLocation');
+  };
+  await assert.rejects(
+    provider.get({ location: 'typo', latitude: point.latitude, longitude: point.longitude }),
+    /unknownLocation/,
+  );
+  await provider.stop();
+});

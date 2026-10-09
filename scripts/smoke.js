@@ -10,13 +10,16 @@ const started = Date.now();
 try {
   await provider.track(46.5197, 6.6323); // Lausanne
   await provider.track(47.3769, 8.5417); // Zürich
+  provider.trackPoint(await provider.locations.find('Genève'));
   await provider.refresh();
-  for (const [latitude, longitude] of [
-    [46.5197, 6.6323],
-    [47.3769, 8.5417],
+  for (const location of [
+    { latitude: 46.5197, longitude: 6.6323 },
+    { latitude: 47.3769, longitude: 8.5417 },
+    { location: 'Genève' },
+    { location: '1201' },
   ]) {
     for (const units of ['metric', 'us']) {
-      const result = await provider.get({ latitude, longitude, units });
+      const result = await provider.get({ ...location, units });
       assert.equal(result.weather.hours.length, 24);
       assert.equal(result.weather.days.length, 8);
       for (const key of WIDGET_KEYS) {

@@ -106,3 +106,24 @@ test('failed metadata download can recover', async () => {
   await assert.rejects(locations.load(), /offline/);
   assert.equal((await locations.load()).length, 1);
 });
+
+test('town lookup accepts accents, postcodes and named postcode areas deterministically', async () => {
+  const locations = new Locations({});
+  locations.points = [
+    { key: '2:120200', name: 'Genève', postalCode: '1202' },
+    { key: '2:120100', name: 'Genève', postalCode: '1201' },
+    { key: '2:111500', name: 'Vullierens', postalCode: '1115' },
+    { key: '2:111501', name: 'Cottens VD', postalCode: '1115' },
+    { key: '2:102500', name: 'St-Sulpice VD', postalCode: '1025' },
+  ];
+  for (const query of ['Genève', '  GENEVE  ', '1201', '1201 Genève', 'Geneve 1201']) {
+    assert.equal((await locations.find(query)).key, '2:120100');
+  }
+  assert.equal((await locations.find('1202')).key, '2:120200');
+  assert.equal((await locations.find('st sulpice vd')).key, '2:102500');
+  await assert.rejects(locations.find('1115'), /ambiguousLocation/);
+  assert.equal((await locations.find('1115 Vullierens')).key, '2:111500');
+  for (const query of ['Paris', 'Gen', '', ' ', '120', 'x'.repeat(101), 1201, null]) {
+    await assert.rejects(locations.find(query), /unknownLocation/);
+  }
+});

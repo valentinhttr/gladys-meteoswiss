@@ -123,16 +123,22 @@ export class MeteoSwissProvider {
 
   async track(latitude, longitude) {
     const point = await this.locations.nearest(latitude, longitude);
+    return this.trackPoint(point);
+  }
+
+  trackPoint(point) {
     if (!this.targets.has(point.key)) {
-      if (this.targets.size >= 20) throw new Error('Maximum 20 forecast localities');
+      if (this.targets.size >= 20) throw new ProviderError('tooManyLocations');
       this.targets.set(point.key, point);
       if (!this.failures) this.nextCheck = 0;
     }
     return point;
   }
 
-  async get({ latitude, longitude, units = 'metric' }) {
-    const point = await this.track(latitude, longitude);
+  async get({ latitude, longitude, location, units = 'metric' }) {
+    const point = location
+      ? this.trackPoint(await this.locations.find(location))
+      : await this.track(latitude, longitude);
     void this.refresh();
     const snapshot = this.snapshots.get(point.key);
     if (!snapshot) throw new ProviderError(this.failures ? 'unavailable' : 'loading');

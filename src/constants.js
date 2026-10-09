@@ -14,4 +14,4 @@ export const PARAMETERS = {
   jp2000d0: { field: 'symbol', period: 'days' },
   rka150p0: { field: 'precipitation', period: 'days' },
 };
-export const WIDGET_KEYS = ['temperature', 'precipitation', 'wind'];
+export const WIDGET_KEYS = ['forecast', 'temperature', 'precipitation', 'wind'];

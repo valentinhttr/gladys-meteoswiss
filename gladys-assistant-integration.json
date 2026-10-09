@@ -21,10 +21,17 @@
         "fr": "Météo Suisse"
       },
       "description": {
-        "en": "No API key needed. Locate your houses in Gladys. The first download may take a few minutes. Forecasts only: warnings and radar are not provided. Source: MeteoSwiss.",
-        "fr": "Aucune clé nécessaire. Localisez vos maisons dans Gladys. Le premier téléchargement peut prendre quelques minutes. Prévisions uniquement : alertes et radar non fournis. Source : MétéoSuisse."
+        "en": "No API key needed. Widgets use your house by default; choose any Swiss town in their settings. First load may take a few minutes. Independent, unofficial integration. Source: MeteoSwiss.",
+        "fr": "Aucune clé nécessaire. Par défaut : votre maison ; choisissez une autre localité suisse dans les réglages des widgets. Le premier chargement peut prendre quelques minutes. Intégration indépendante et non officielle. Source : Météo Suisse."
       },
       "links": [
+        {
+          "url": "https://www.meteosuisse.admin.ch",
+          "label": {
+            "en": "Météo Suisse (MeteoSwiss)",
+            "fr": "Météo Suisse"
+          }
+        },
         {
           "url": "https://opendatadocs.meteoswiss.ch/e-forecast-data/e4-local-forecast-data",
           "label": {
@@ -37,6 +44,50 @@
   ],
   "widgets": [
     {
+      "key": "forecast",
+      "label": {
+        "en": "Forecast · 8 days",
+        "fr": "Prévisions · 8 jours"
+      },
+      "description": {
+        "en": "The whole week: conditions, minimum/maximum temperatures and precipitation.",
+        "fr": "Toute la semaine : conditions, températures minimales/maximales et précipitations."
+      },
+      "icon": "calendar",
+      "settings": [
+        {
+          "key": "location",
+          "type": "string",
+          "required": false,
+          "label": {
+            "en": "Location",
+            "fr": "Localité"
+          },
+          "placeholder": {
+            "en": "Genève or 1201",
+            "fr": "Genève ou 1201"
+          },
+          "description": {
+            "en": "Town or Swiss postcode. Leave empty to use your house. This overrides the House setting.",
+            "fr": "Ville ou NPA suisse. Vide : météo de votre maison. Ce champ est prioritaire sur Maison."
+          }
+        },
+        {
+          "key": "house",
+          "type": "string",
+          "required": false,
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "description": {
+            "en": "House name or selector in Gladys. Leave empty for the first located house.",
+            "fr": "Nom ou identifiant de la maison dans Gladys. Vide : première maison localisée."
+          }
+        }
+      ]
+    },
+    {
       "key": "temperature",
       "label": {
         "en": "Temperature · 24 hours",
@@ -48,6 +99,23 @@
       },
       "icon": "thermometer",
       "settings": [
+        {
+          "key": "location",
+          "type": "string",
+          "required": false,
+          "label": {
+            "en": "Location",
+            "fr": "Localité"
+          },
+          "placeholder": {
+            "en": "Genève or 1201",
+            "fr": "Genève ou 1201"
+          },
+          "description": {
+            "en": "Town or Swiss postcode. Leave empty to use your house. This overrides the House setting.",
+            "fr": "Ville ou NPA suisse. Vide : météo de votre maison. Ce champ est prioritaire sur Maison."
+          }
+        },
         {
           "key": "house",
           "type": "string",
@@ -76,6 +144,23 @@
       "icon": "cloud-rain",
       "settings": [
         {
+          "key": "location",
+          "type": "string",
+          "required": false,
+          "label": {
+            "en": "Location",
+            "fr": "Localité"
+          },
+          "placeholder": {
+            "en": "Genève or 1201",
+            "fr": "Genève ou 1201"
+          },
+          "description": {
+            "en": "Town or Swiss postcode. Leave empty to use your house. This overrides the House setting.",
+            "fr": "Ville ou NPA suisse. Vide : météo de votre maison. Ce champ est prioritaire sur Maison."
+          }
+        },
+        {
           "key": "house",
           "type": "string",
           "required": false,
@@ -102,6 +187,23 @@
       },
       "icon": "wind",
       "settings": [
+        {
+          "key": "location",
+          "type": "string",
+          "required": false,
+          "label": {
+            "en": "Location",
+            "fr": "Localité"
+          },
+          "placeholder": {
+            "en": "Genève or 1201",
+            "fr": "Genève ou 1201"
+          },
+          "description": {
+            "en": "Town or Swiss postcode. Leave empty to use your house. This overrides the House setting.",
+            "fr": "Ville ou NPA suisse. Vide : météo de votre maison. Ce champ est prioritaire sur Maison."
+          }
+        },
         {
           "key": "house",
           "type": "string",

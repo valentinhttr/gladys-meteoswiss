@@ -53,15 +53,18 @@ export function registerIntegration(gladys, provider, logger = console) {
 
   for (const key of WIDGET_KEYS) {
     gladys.onWidgetGet(key, async ({ settings = {}, language = 'en', units = 'metric' }) => {
+      const location = typeof settings.location === 'string' ? settings.location.trim() : '';
       const selected = typeof settings.house === 'string' ? settings.house.trim() : '';
       const candidates = selected
         ? houses.filter((house) => house.name === selected || house.selector === selected)
         : houses.filter((house) => coordinatesValid(house.latitude, house.longitude));
       // Do not silently display another house when a name is wrong or ambiguous.
       const house = selected ? (candidates.length === 1 ? candidates[0] : null) : candidates[0];
-      if (!house) return messageWidget(messages.noHouse);
+      if (!location && !house) return messageWidget(messages.noHouse);
       try {
-        const result = await withinDeadline(provider.get({ ...house, units }));
+        const result = await withinDeadline(
+          provider.get(location ? { location, units } : { ...house, units }),
+        );
         return forecastWidget(key, result, units, language);
       } catch (error) {
         return messageWidget(messages[error.code] ?? messages.unavailable);

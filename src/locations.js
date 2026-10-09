@@ -22,6 +22,16 @@ export function distanceKm(a, b) {
   return 6371 * 2 * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
+function normalizeLocation(value) {
+  return value
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[’'\-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export class Locations {
   constructor(http) {
     this.http = http;
@@ -77,5 +87,30 @@ export class Locations {
     // Coverage is proximity-based, not a political boundary: documented for border homes.
     if (distance > 20) throw new ProviderError('outside');
     return nearest;
+  }
+
+  async find(query) {
+    if (typeof query !== 'string' || !query.trim() || query.length > 100) {
+      throw new ProviderError('unknownLocation');
+    }
+    const search = normalizeLocation(query);
+    const matches = (await this.load()).filter((point) =>
+      [
+        point.name,
+        point.postalCode,
+        `${point.postalCode} ${point.name}`,
+        `${point.name} ${point.postalCode}`,
+      ].some((value) => normalizeLocation(value ?? '') === search),
+    );
+    if (!matches.length) throw new ProviderError('unknownLocation');
+    // A city may have several postcodes. Choose its lowest postcode consistently;
+    // a postcode shared by differently named villages requires the village name.
+    if (new Set(matches.map((point) => normalizeLocation(point.name))).size > 1) {
+      throw new ProviderError('ambiguousLocation');
+    }
+    return matches.sort(
+      (a, b) =>
+        (a.postalCode ?? '').localeCompare(b.postalCode ?? '') || a.key.localeCompare(b.key),
+    )[0];
   }
 }
