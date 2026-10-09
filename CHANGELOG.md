@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.2 (2026-10-09)
+
+### Fixes / Corrections
+
+- fix: remove redundant 8-day widget and simplify chart titles and source placement (c501c71)
+
 ## 1.1.1 (2026-10-09)
 
 ### Fixes / Corrections
