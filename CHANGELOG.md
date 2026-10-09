@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.3 (2026-10-09)
+
+### Fixes / Corrections
+
+- fix: disable now marker to avoid overlapping chart axis labels (7d83050)
+
 ## 1.1.2 (2026-10-09)
 
 ### Fixes / Corrections
