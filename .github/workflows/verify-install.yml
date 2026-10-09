@@ -1,0 +1,24 @@
+name: Verify public installation
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  anonymous-pull:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download published image without registry credentials
+        run: |
+          set -euo pipefail
+          image="$(node -p 'require("./gladys-assistant-integration.json").docker_image')"
+          export DOCKER_CONFIG="$(mktemp -d)"
+          docker pull "$image"
+          docker run --rm --read-only --network=none "$image" node --input-type=module -e '
+            import { createRequire } from "node:module";
+            import { GladysIntegration } from "@gladysassistant/integration-sdk";
+            const require = createRequire(import.meta.url);
+            const sdk = require("@gladysassistant/integration-sdk/package.json");
+            if (sdk.version !== "0.14.0" || typeof GladysIntegration !== "function") process.exit(1);
+            console.log("Published image starts correctly; Gladys SDK", sdk.version);
+          '
