@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.4 (2026-10-09)
+
+### Fixes / Corrections
+
+- fix: show source and forecast time in muted widget subtitle (90da241)
+
+### Maintenance
+
+- docs: refresh store cover with Swiss flag and MeteoSwiss colors (343a42d)
+
 ## 1.1.3 (2026-10-09)
 
 ### Fixes / Corrections
