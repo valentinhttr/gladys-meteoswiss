@@ -10,7 +10,11 @@
 - `src/forecast.js` : format pivot Gladys, unités, périodes et codes météo.
 - `src/widgets.js` / `src/i18n.js` : contenu déclaratif et textes bilingues.
 
-Le widget météo natif consomme `onWeatherGet`. Les trois widgets déclarés au manifeste consomment `onWidgetGet`. Aucun appareil factice ni capteur n’est créé. L’accès `location: true` sert uniquement à précharger les maisons et à choisir celle des widgets supplémentaires ; les commandes météo natives contiennent déjà les coordonnées.
+Le widget météo natif consomme `onWeatherGet`. Les quatre widgets déclarés au manifeste consomment `onWidgetGet` : une liste des huit jours et trois graphiques horaires. Aucun appareil factice ni capteur n’est créé. L’accès `location: true` sert à précharger les maisons et à choisir celle des widgets supplémentaires ; les commandes météo natives contiennent déjà les coordonnées.
+
+Le réglage `location` de chaque widget prend priorité sur `house`. La ville ou le NPA est résolu localement dans les métadonnées postales officielles, sans géocodage tiers. Les noms sont comparés sans accents, sans distinction de casse, avec espaces/tirets normalisés. Une ville comportant plusieurs NPA utilise le plus petit NPA ; un NPA partagé entre des localités de noms différents demande une précision. Une erreur de saisie ne revient jamais à la maison. Le cache est indexé par le point officiel, donc les noms et NPA menant au même point partagent les données.
+
+La liste hebdomadaire utilise `card-list` en mode `list`, sans défilement interne. Les jours sont formatés dans le fuseau suisse. Les champs `date` sont omis car Gladys les afficherait à la place des sous-titres contenant les températures et précipitations. Le contrat Gladys ne permet pas de lien dans les titres ; les boutons de site sont retirés et le lien est disponible dans la configuration, avec attribution dans chaque widget.
 
 ## Données
 
