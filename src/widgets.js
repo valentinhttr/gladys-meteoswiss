@@ -76,7 +76,6 @@ export function forecastWidget(key, { weather, point, run }, units, language) {
         chart_type: key === 'precipitation' ? 'bar' : 'line',
         unit,
         title: messages.total,
-        now_marker: true,
         series,
       },
       {
