@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1 (2026-10-09)
+
+### Fixes / Corrections
+
+- fix: add MeteoSwiss store cover (27210b1)
+
 ## 1.1.0 (2026-10-09)
 
 ### Features / Fonctionnalités

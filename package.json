@@ -1,6 +1,6 @@
 {
   "name": "gladys-meteoswiss",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "MeteoSwiss Open Data weather provider for Gladys Assistant",
   "type": "module",
