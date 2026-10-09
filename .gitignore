@@ -1,0 +1,6 @@
+node_modules/
+coverage/
+.env
+.data/
+release-notes.md
+.DS_Store

@@ -1,0 +1,28 @@
+{
+  "name": "gladys-meteoswiss",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MeteoSwiss Open Data weather provider for Gladys Assistant",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test test/*.test.js",
+    "check": "node scripts/check.js && prettier --check .",
+    "format": "prettier --write .",
+    "smoke": "node scripts/smoke.js",
+    "release:prepare": "node scripts/release.js",
+    "setup:repository": "node scripts/setup-repository.js"
+  },
+  "dependencies": {
+    "@gladysassistant/integration-sdk": "0.14.0",
+    "csv-parse": "7.0.3"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "prettier": "3.6.2"
+  }
+}

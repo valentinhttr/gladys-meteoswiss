@@ -1,0 +1,13 @@
+Gladys MeteoSwiss — independent community integration.
+
+Source of weather data: MeteoSwiss (MétéoSuisse).
+Data terms: https://opendatadocs.meteoswiss.ch/
+No proprietary MeteoSwiss graphics are included.
+
+test/fixtures/manifest.schema.json is reproduced from Gladys Assistant:
+https://github.com/GladysAssistant/Gladys/blob/master/server/lib/external-integration/manifest.schema.json
+Copyright Gladys Assistant contributors. Licensed under Apache License 2.0.
+See docs/licenses/Apache-2.0.txt.
+
+The @gladysassistant/integration-sdk package is licensed under Apache-2.0.
+Its copyright notices and license are included in the installed dependency.

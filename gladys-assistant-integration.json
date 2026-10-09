@@ -1,0 +1,121 @@
+{
+  "manifest_version": 1,
+  "type": "weather",
+  "name": "Météo Suisse / MeteoSwiss",
+  "description": {
+    "en": "Swiss local weather forecasts from MeteoSwiss Open Data.",
+    "fr": "Prévisions météo locales suisses issues des données ouvertes de MétéoSuisse."
+  },
+  "version": "1.0.0",
+  "docker_image": "ghcr.io/valentinhttr/gladys-meteoswiss:1.0.0",
+  "gladys_version": ">=5.1.0",
+  "categories": ["environment"],
+  "transports": ["cloud"],
+  "location": true,
+  "config_schema": [
+    {
+      "key": "about",
+      "type": "section",
+      "label": {
+        "en": "MeteoSwiss",
+        "fr": "Météo Suisse"
+      },
+      "description": {
+        "en": "No API key needed. Locate your houses in Gladys. The first download may take a few minutes. Forecasts only: warnings and radar are not provided. Source: MeteoSwiss.",
+        "fr": "Aucune clé nécessaire. Localisez vos maisons dans Gladys. Le premier téléchargement peut prendre quelques minutes. Prévisions uniquement : alertes et radar non fournis. Source : MétéoSuisse."
+      },
+      "links": [
+        {
+          "url": "https://opendatadocs.meteoswiss.ch/e-forecast-data/e4-local-forecast-data",
+          "label": {
+            "en": "Data source and terms",
+            "fr": "Source des données et conditions"
+          }
+        }
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "key": "temperature",
+      "label": {
+        "en": "Temperature · 24 hours",
+        "fr": "Température · 24 heures"
+      },
+      "description": {
+        "en": "Hourly temperature forecast.",
+        "fr": "Prévisions horaires de température."
+      },
+      "icon": "thermometer",
+      "settings": [
+        {
+          "key": "house",
+          "type": "string",
+          "required": false,
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "description": {
+            "en": "House name or selector in Gladys. Leave empty for the first located house.",
+            "fr": "Nom ou identifiant de la maison dans Gladys. Vide : première maison localisée."
+          }
+        }
+      ]
+    },
+    {
+      "key": "precipitation",
+      "label": {
+        "en": "Precipitation · 24 hours",
+        "fr": "Précipitations · 24 heures"
+      },
+      "description": {
+        "en": "Hourly precipitation forecast and total.",
+        "fr": "Prévisions horaires de précipitations et cumul."
+      },
+      "icon": "cloud-rain",
+      "settings": [
+        {
+          "key": "house",
+          "type": "string",
+          "required": false,
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "description": {
+            "en": "House name or selector in Gladys. Leave empty for the first located house.",
+            "fr": "Nom ou identifiant de la maison dans Gladys. Vide : première maison localisée."
+          }
+        }
+      ]
+    },
+    {
+      "key": "wind",
+      "label": {
+        "en": "Wind · 24 hours",
+        "fr": "Vent · 24 heures"
+      },
+      "description": {
+        "en": "Hourly wind speed and gust forecasts.",
+        "fr": "Prévisions horaires de vent et de rafales."
+      },
+      "icon": "wind",
+      "settings": [
+        {
+          "key": "house",
+          "type": "string",
+          "required": false,
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "description": {
+            "en": "House name or selector in Gladys. Leave empty for the first located house.",
+            "fr": "Nom ou identifiant de la maison dans Gladys. Vide : première maison localisée."
+          }
+        }
+      ]
+    }
+  ]
+}

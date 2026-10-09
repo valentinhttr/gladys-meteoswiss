@@ -1,0 +1,1132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gladysassistant.github.io/integration-store/manifest.schema.json",
+  "$comment": "Vendored copy of the canonical schema owned by GladysAssistant/integration-store (schemas/manifest.schema.json, also published on the store GitHub Pages). externalIntegration.validateManifest.js enforces the exact same rules; update both together.",
+  "title": "Gladys Assistant external integration manifest",
+  "description": "Schema of the `gladys-assistant-integration.json` file placed at the root of an integration repository (manifest_version 1). This file is the canonical source: the store indexer and the Gladys server both validate manifests against it. Some rules cannot be expressed in JSON Schema and are enforced by code: `version` must be strict semver, `gladys_version` must be a valid semver range (npm syntax), `docker_image` must be a well-formed image reference with an explicit tag or digest, `config_schema` keys must be unique and defaults must match their field type.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifest_version", "type", "name", "description", "version", "docker_image", "gladys_version"],
+  "properties": {
+    "manifest_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Version of the manifest format. Only 1 is supported: a manifest with a higher version is rejected by indexers and servers that do not support it."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["device", "communication", "weather", "calendar", "provider"],
+      "description": "Integration type. \"device\" integrations expose devices through the Devices/Discovery/Configuration screens; \"communication\" integrations are messaging channels (Telegram-like bots): no device screens, the user links their account from the Gladys UI and the integration exchanges messages through the host API; \"weather\" integrations are weather providers: a dedicated API (no device screens), they answer the core's weather requests over WebSocket; \"calendar\" integrations are calendar providers: no device screens, each user enables their own account and the integration pushes calendars and events through the host API; \"provider\" integrations are made only of capabilities (dashboard widgets today): no device surface, a configuration-only page, and at least one capability field (widgets) is required."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 30,
+      "description": "Display name, used as the title of the catalog card."
+    },
+    "description": {
+      "type": "object",
+      "description": "Short multi-language description displayed on the catalog card. The `en` key is mandatory, other languages are optional.",
+      "required": ["en"],
+      "propertyNames": {
+        "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 10,
+        "maxLength": 100
+      }
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Version of the integration. Must be strict semver (e.g. \"1.2.0\"); bumping it is what triggers the \"update available\" flag in Gladys."
+    },
+    "docker_image": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Docker image reference on any public registry, with an explicit tag or digest (e.g. \"ghcr.io/john/gladys-open-meteo-demo:1.2.0\")."
+    },
+    "gladys_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Range of compatible Gladys versions, npm semver range syntax (e.g. \">=4.62.0\"). Used by Gladys to filter the catalog."
+    },
+    "cover_image": {
+      "type": "string",
+      "pattern": "^https://",
+      "description": "HTTPS URL of a JPEG or PNG cover image, exactly 800x534 pixels, 150 KB max. Validated then re-hosted by the indexer; a missing or invalid cover does not reject the integration (a placeholder is used and a warning is published)."
+    },
+    "config_schema": {
+      "type": "array",
+      "description": "Flat list of configuration fields, rendered as a generated form by the Gladys UI (declarative UI: no code injection).",
+      "items": {
+        "$ref": "#/definitions/configField"
+      }
+    },
+    "containers": {
+      "type": "array",
+      "maxItems": 5,
+      "description": "Authorization contract of the additional sub-containers (multi-container integrations, e.g. Frigate + Mosquitto): everything that can run — images, limits, published ports, hardware access — shown to the user on the install screen. The lifecycle is then driven by the integration through the /container host API, only within these bounds.",
+      "items": {
+        "$ref": "#/definitions/subContainer"
+      }
+    },
+    "location": {
+      "type": "boolean",
+      "description": "Declare true to request access to the coordinates of the houses configured in Gladys (GET /house host API). The home location is sensitive personal data: the request is shown on the install screen as an authorization contract, and an integration that does not declare it gets a 403 (enforced server-side)."
+    },
+    "network_wake": {
+      "type": "boolean",
+      "description": "Declare true to request permission to send Wake-on-LAN magic packets through the Gladys core Host API. The request is shown on the install screen and is enforced server-side; an integration that does not declare it gets a 403."
+    },
+    "network_discovery": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "description": "Curated network capture requests (mediated discovery): the Gladys core, running in network=host, captures on behalf of the integration, which interprets the raw results itself. Shown on the install screen as an authorization contract; no arbitrary capture.",
+      "items": {
+        "$ref": "#/definitions/networkDiscoveryEntry"
+      }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "description": "On-demand operations rendered as buttons in the Configuration screen (connection test, identify, protocol detection...). Each action is relayed to the integration over WebSocket and acked within its own declared timeout.",
+      "items": {
+        "$ref": "#/definitions/action"
+      }
+    },
+    "transports": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["local", "cloud"]
+      },
+      "description": "Channels the integration knows how to use. When both are declared, Gladys renders the standard core-translated \"Prefer local (LAN) connection\" toggle, stored as the reserved GLADYS_PREFER_LOCAL config key (boolean, default true) — readable by the integration, never writable by it. The preference is a wish; the per-device reality is reported through the GLADYS_TRANSPORT param."
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Browse categories of the integration catalog: the domains of use under which the integration is listed, fully decoupled from the technical `type`. Deliberately no enum here — the schema only rejects the shape; the controlled vocabulary is matched in code as a second, filtering stage (unknown keys are dropped with a warning, never a rejection), so a manifest published with a newer vocabulary than the running instance still installs. Declaring the field requires gladys_version >= the first release accepting it (older cores reject unknown manifest fields)."
+    },
+    "webhooks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "description": "Inbound webhooks relayed by the generic Gladys Plus gateway route (shown on the install screen). fire_and_forget (default): the third party only wants an ack — immediate 200, asynchronous lossy relay (a webhook is a trigger, the poll stays the source of truth). sync: the integration's response (status/content_type/body) is relayed back to the caller (challenge/response registration providers).",
+      "items": {
+        "$ref": "#/definitions/webhook"
+      }
+    },
+    "messaging": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receive"],
+      "description": "Communication type only. receive true (the default without this field): bidirectional chat channel — inbound messages carry the authority of the code-linked user, POST /message and the link endpoints are open. receive false: send-only notification channel (the Free Mobile family) — POST /message and code-based linking answer 403, the per-user identity comes from contact_schema instead.",
+      "properties": {
+        "receive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "contact_schema": {
+      "type": "array",
+      "description": "Send-only communication channels only (messaging.receive false): per-user identity form rendered by the core as a \"My account\" block on the Configuration screen (every user fills their OWN values, stored per user). Same flat format as config_schema; oauth2 and account_link fields are not allowed (linking a provider account is integration-scoped, never per user).",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/configField"
+          },
+          {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": ["oauth2", "account_link"]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "account_schema": {
+      "type": "array",
+      "description": "Calendar integrations only: per-user account form rendered by the core as a \"My calendars\" block on the Configuration screen (every user fills their OWN values, stored per user; an integration with nothing to ask declares no account_schema and the block only carries the Enable/Disable action). Same flat format as config_schema; oauth2 and account_link fields are not allowed in milestone 1 (the Connect relay is integration-scoped, never per user).",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/configField"
+          },
+          {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": ["oauth2", "account_link"]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "widgets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "description": "Dashboard widgets declared by the integration (capability, any type may declare them): identity, icon and per-instance settings; the content itself is produced at runtime over widget.get in the published widget-content vocabulary. Listed on the install screen and in the dashboard box picker.",
+      "items": {
+        "$ref": "#/definitions/widget"
+      }
+    },
+    "scene_triggers": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "description": "Scene triggers declared for the Gladys scene editor (\"Integrations\" category of the trigger picker). The integration fires a declared key through POST /api/integration/v1/scene/event with flat data; the core compares the declared `fields` (filters filled by the scene author, wildcard when empty) with the event and starts the matching scenes, exposing the declared `variables` as {{triggerEvent.data.<key>}}. A published key is never renamed (scenes store it); removing one is a breaking update. Declaring the field requires gladys_version >= the first release accepting it.",
+      "items": {
+        "$ref": "#/definitions/sceneTrigger"
+      }
+    },
+    "energy_contracts": {
+      "type": "object",
+      "description": "Energy contracts capability (capabilities/energy-contracts.md): contract templates (a tariff definition of the core rule engine, validated against tariff.schema.json, or a delegated pricing computed by the integration over energy-contract.price) and tariff calendars the integration feeds through POST /api/integration/v1/energy/calendar (day colours, spot prices, critical peak days). Calendar keys are global per Gladys instance and owned by the first installed integration declaring them. Shown on the install screen. Declaring the field requires gladys_version >= the first release accepting it.",
+      "additionalProperties": false,
+      "anyOf": [{ "required": ["templates"] }, { "required": ["calendars"] }],
+      "properties": {
+        "templates": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": { "$ref": "#/definitions/energyContractTemplate" }
+        },
+        "calendars": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": { "$ref": "#/definitions/energyCalendar" }
+        }
+      }
+    },
+    "scene_actions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "description": "Scene actions declared for the Gladys scene editor (\"Integrations\" category of the action picker). A scene reaching one relays it to the integration over WebSocket (external-integration.scene-action.run) with the resolved `fields` (scene variables substituted in string fields), acked within the declared timeout; the `outputs` of the command-result are exposed to the following actions. Same key rules as scene_triggers; a required field added without a default is a breaking update.",
+      "items": {
+        "$ref": "#/definitions/sceneAction"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "messaging only makes sense on communication integrations",
+      "if": {
+        "required": ["messaging"]
+      },
+      "then": {
+        "properties": {
+          "type": {
+            "const": "communication"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "contact_schema only makes sense on send-only channels",
+      "if": {
+        "required": ["contact_schema"]
+      },
+      "then": {
+        "required": ["messaging"],
+        "properties": {
+          "messaging": {
+            "required": ["receive"],
+            "properties": {
+              "receive": {
+                "const": false
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$comment": "account_schema only makes sense on calendar integrations",
+      "if": {
+        "required": ["account_schema"]
+      },
+      "then": {
+        "properties": {
+          "type": {
+            "const": "calendar"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "a provider integration must declare at least one capability field",
+      "if": {
+        "properties": {
+          "type": {
+            "const": "provider"
+          }
+        },
+        "required": ["type"]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "required": ["widgets"]
+          },
+          {
+            "required": ["scene_triggers"]
+          },
+          {
+            "required": ["scene_actions"]
+          },
+          {
+            "required": ["energy_contracts"]
+          }
+        ]
+      }
+    }
+  ],
+  "definitions": {
+    "energyContractTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "name", "country", "currency", "pricing_mode", "version"],
+      "description": "A contract template: a key never renamed once published (contracts store it), a tariff definition in rules mode (validated against tariff.schema.json after the {{input:<key>}} placeholders are substituted), optional in delegated mode where only fixed components are allowed. Every calendar the tariff references is listed in calendars.",
+      "properties": {
+        "key": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+        "name": { "$ref": "#/definitions/multiLanguageText" },
+        "description": { "$ref": "#/definitions/multiLanguageText" },
+        "country": { "type": "string", "pattern": "^[A-Z]{2}$" },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "timezone": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "pricing_mode": { "type": "string", "enum": ["rules", "delegated"] },
+        "version": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "calendars": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" }
+        },
+        "inputs": {
+          "type": "array",
+          "maxItems": 16,
+          "items": { "$ref": "#/definitions/energyTemplateInput" }
+        },
+        "tariff": { "type": "object" }
+      },
+      "if": { "properties": { "pricing_mode": { "const": "rules" } } },
+      "then": { "required": ["tariff"] }
+    },
+    "energyTemplateInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "type"],
+      "description": "A template parameter filled by the user and substituted into the tariff ({{input:<key>}}) or sent to the integration in delegated mode: number, select, string, or time_intervals (a list of [\"HH:MM\", \"HH:MM\"] slots picked on the 30-minute grid, for off-peak hours).",
+      "properties": {
+        "key": { "type": "string", "pattern": "^[a-z0-9_]{1,64}$" },
+        "type": { "type": "string", "enum": ["number", "select", "string", "time_intervals"] },
+        "label": { "$ref": "#/definitions/multiLanguageText" },
+        "description": { "$ref": "#/definitions/multiLanguageText" },
+        "unit": { "type": "string", "minLength": 1, "maxLength": 16 },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": { "type": ["string", "number"] }
+        },
+        "default": {},
+        "required": { "type": "boolean" }
+      }
+    },
+    "energyCalendar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key"],
+      "description": "A tariff calendar the integration publishes: dated string values within the declared enum (day colours, holidays, event days) on a daily, 30-minute or 15-minute grid, or numeric prices per kWh (values omitted, currency set). A daily calendar may start its day at another local time (day_starts_at, 06:00 for the Tempo colour).",
+      "properties": {
+        "key": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+        "granularity": { "type": "string", "enum": ["day", "thirty_minutes", "fifteen_minutes"] },
+        "timezone": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "day_starts_at": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 64 }
+        },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+      }
+    },
+    "multiLanguageText": {
+      "type": "object",
+      "required": ["en"],
+      "propertyNames": {
+        "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "configField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "type", "label"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "description": "Unique key of the field, stored in Gladys variables scoped to the integration."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "select",
+            "multi_select",
+            "secret",
+            "oauth2",
+            "account_link",
+            "section"
+          ],
+          "description": "Field widget type. `secret` values are never sent back to the frontend; `oauth2` renders a Connect button (relayed OAuth2 authorization-code flow, tokens stored off-schema by the integration); `account_link` renders a Connect button too, for a provider that never redirects back (a QR sign-in the user approves in the vendor app, a pairing to confirm on a device): no redirect URI, no anti-CSRF state and no callback are involved, the integration detects the approval on its side and reports it through the connection status; `multi_select` renders checkboxes and stores an array of option values; `section` is a purely presentational intro block (title + plain-text description + typed https links) splitting the form — no stored value, its key is never accepted in a config payload."
+        },
+        "label": {
+          "$ref": "#/definitions/multiLanguageText"
+        },
+        "description": {
+          "$ref": "#/definitions/multiLanguageText"
+        },
+        "placeholder": {
+          "$ref": "#/definitions/multiLanguageText",
+          "description": "Input placeholder, `string`, `number` and `secret` fields only."
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "default": {
+          "description": "Default value. Must match the field type (code-enforced); not allowed for `secret`, `oauth2`, `account_link` and `section` fields."
+        },
+        "min": {
+          "type": "number",
+          "description": "Minimum value, `number` fields only."
+        },
+        "max": {
+          "type": "number",
+          "description": "Maximum value, `number` fields only."
+        },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Choices of a `select` or `multi_select` field.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value", "label"],
+            "properties": {
+              "value": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label": {
+                "$ref": "#/definitions/multiLanguageText"
+              }
+            }
+          }
+        },
+        "source": {
+          "type": "string",
+          "enum": ["devices", "houses"],
+          "description": "Dynamic options of a `select` or `multi_select` field, provided by the core — a reserved enum, never a URL nor an expression. Mutually exclusive with `options`; `default` is not allowed with a source (code-enforced). \"devices\": the Gladys UI populates the options with the already-created devices of the integration (label = device name, value = external_id). \"houses\": the options are the houses of Gladys (label = house name, value = selector, the identifier GET /house returns)."
+        },
+        "display": {
+          "type": "string",
+          "enum": ["dropdown", "radio"],
+          "description": "Rendering of a `select` field: dropdown (default) or radio buttons."
+        },
+        "links": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "description": "Typed links of a `section` field, opened in a new tab with the target domain displayed next to the label (third-party non-moderated content: the user sees where they click). Https only.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["url", "label"],
+            "properties": {
+              "url": {
+                "type": "string",
+                "pattern": "^https://"
+              },
+              "label": {
+                "$ref": "#/definitions/multiLanguageText"
+              }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "section"
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "not": {
+                  "required": ["required"]
+                }
+              },
+              {
+                "not": {
+                  "required": ["default"]
+                }
+              }
+            ]
+          },
+          "else": {
+            "not": {
+              "required": ["links"]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": ["select", "multi_select"]
+              }
+            }
+          },
+          "then": {
+            "oneOf": [
+              {
+                "required": ["options"],
+                "not": {
+                  "required": ["source"]
+                }
+              },
+              {
+                "required": ["source"],
+                "not": {
+                  "required": ["options"]
+                }
+              }
+            ]
+          },
+          "else": {
+            "allOf": [
+              {
+                "not": {
+                  "required": ["options"]
+                }
+              },
+              {
+                "not": {
+                  "required": ["source"]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "properties": {
+                "type": {
+                  "const": "number"
+                }
+              }
+            }
+          },
+          "then": {
+            "allOf": [
+              {
+                "not": {
+                  "required": ["min"]
+                }
+              },
+              {
+                "not": {
+                  "required": ["max"]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "properties": {
+                "type": {
+                  "enum": ["string", "number", "secret"]
+                }
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": ["placeholder"]
+            }
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "properties": {
+                "type": {
+                  "const": "select"
+                }
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": ["display"]
+            }
+          }
+        }
+      ]
+    },
+    "subContainer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "docker_image"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]{2,20}$",
+          "description": "Unique name of the sub-container: DNS alias on the private network of the integration, suffix of the container name and identifier in the /container host API."
+        },
+        "docker_image": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Docker image reference, same rules as the main image (public registry, explicit tag or digest, multi-arch recommended)."
+        },
+        "start": {
+          "type": "string",
+          "enum": ["auto", "manual"],
+          "default": "auto",
+          "description": "`auto`: created and started by the supervisor before the main container. `manual`: nothing starts until the integration calls POST /container/:name/start (e.g. generate a password file in /data first)."
+        },
+        "env": {
+          "type": "object",
+          "description": "Static string environment variables. GLADYS_* keys are forbidden (code-enforced). The manifest is public: never a secret here — runtime credentials go through /data files or the env of POST /container/:name/start.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "volumes": {
+          "type": "array",
+          "maxItems": 5,
+          "description": "Absolute container paths. Each one is mounted from a sub-folder derived from the integration data folder by the supervisor — the manifest never chooses a host path.",
+          "items": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        },
+        "ports": {
+          "type": "array",
+          "maxItems": 3,
+          "description": "Published ports. The host port is chosen by Gladys (free, persisted across recreations), never declared. Publishing a port exposes a third-party interface on the LAN: it is shown on the install screen.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["container_port", "label"],
+            "properties": {
+              "container_port": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "protocol": {
+                "type": "string",
+                "enum": ["tcp", "udp"],
+                "default": "tcp"
+              },
+              "name": {
+                "type": "string",
+                "pattern": "^[a-z0-9_]{2,20}$",
+                "description": "Optional stable identifier, unique across the whole manifest: makes the assigned host port referenceable by the {{port:<name>}} placeholder of the section texts, resolved by the frontend."
+              },
+              "label": {
+                "$ref": "#/definitions/multiLanguageText",
+                "description": "Names the \"Open\" link in the Gladys UI, or the badge when the port is not browsable."
+              },
+              "browsable": {
+                "type": "boolean",
+                "default": true,
+                "description": "false: the port does not serve a web UI (e.g. a WebSocket endpoint for devices, the OCPP case) — the supervision screen shows the assigned host port without the \"Open\" link."
+              }
+            }
+          }
+        },
+        "devices": {
+          "type": "array",
+          "description": "Requested hardware access classes — never a free /dev path. Requesting is not obtaining: each class is granted or refused by the user in the UI; the effective mount is requested ∩ granted ∩ present.",
+          "items": {
+            "type": "string",
+            "enum": ["coral-usb", "coral-pcie", "gpu", "video"]
+          }
+        },
+        "read_only": {
+          "type": "boolean",
+          "default": true,
+          "description": "Read-only root filesystem. Opt-out possible: some upstream images (e.g. Frigate) do not run with a read-only rootfs."
+        },
+        "memory_mb": {
+          "type": "integer",
+          "minimum": 32,
+          "maximum": 4096,
+          "default": 256,
+          "description": "Memory limit in MB, shown on the install screen."
+        },
+        "cpu": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 2,
+          "default": 0.5,
+          "description": "CPU limit, shown on the install screen."
+        },
+        "shm_mb": {
+          "type": "integer",
+          "minimum": 64,
+          "maximum": 512,
+          "default": 64,
+          "description": "/dev/shm size in MB, useful for video processing."
+        },
+        "command": {
+          "type": "array",
+          "description": "Optional override of the image CMD.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "networkDiscoveryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["udp-broadcast", "udp-active-broadcast", "mdns", "ssdp"],
+          "description": "Capture type: passive listen on declared UDP broadcast ports, active query/response broadcast on declared UDP ports (the integration provides the payload at scan time, the core broadcasts it and relays the raw unicast replies — the TP-Link Kasa case), mDNS browse of a declared service type, or SSDP M-SEARCH on a declared st."
+        },
+        "ports": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "uniqueItems": true,
+          "description": "UDP broadcast ports, `udp-broadcast` (listen) and `udp-active-broadcast` (emit) types only."
+        },
+        "service": {
+          "type": "string",
+          "pattern": "^_[a-z0-9-]+\\._(tcp|udp)$",
+          "description": "DNS-SD service type to browse (e.g. \"_hue._tcp\"), `mdns` type only."
+        },
+        "st": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "SSDP search target for the M-SEARCH, `ssdp` type only."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": ["udp-broadcast", "udp-active-broadcast"]
+              }
+            }
+          },
+          "then": {
+            "required": ["ports"],
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["service"]
+                },
+                {
+                  "required": ["st"]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "mdns"
+              }
+            }
+          },
+          "then": {
+            "required": ["service"],
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["ports"]
+                },
+                {
+                  "required": ["st"]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ssdp"
+              }
+            }
+          },
+          "then": {
+            "required": ["st"],
+            "not": {
+              "anyOf": [
+                {
+                  "required": ["ports"]
+                },
+                {
+                  "required": ["service"]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "description": "Unique key of the action."
+        },
+        "label": {
+          "$ref": "#/definitions/multiLanguageText"
+        },
+        "description": {
+          "$ref": "#/definitions/multiLanguageText"
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 120,
+          "default": 30,
+          "description": "Ack delay granted to the action (exception to the 5s command rule: these operations can be long)."
+        },
+        "fields": {
+          "type": "array",
+          "description": "Optional flat form shown before running the action, same format as config_schema entries.",
+          "items": {
+            "$ref": "#/definitions/configField"
+          }
+        }
+      }
+    },
+    "webhook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "description": "Unique key of the webhook, last segment of the relayed URL."
+        },
+        "label": {
+          "$ref": "#/definitions/multiLanguageText"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["fire_and_forget", "sync"],
+          "default": "fire_and_forget",
+          "description": "fire_and_forget: immediate 200 to the caller, asynchronous relay without ack. sync: the integration's response is relayed back to the caller."
+        }
+      }
+    },
+    "widgetSettingField": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/configField"
+        },
+        {
+          "properties": {
+            "type": {
+              "enum": ["string", "number", "boolean", "select", "multi_select", "section"],
+              "description": "Widget settings live in the dashboard JSON, readable by every user of a public dashboard: `secret`, `oauth2` and `account_link` are not allowed. {{port:<name>}} placeholders are not allowed in section texts either (code-enforced)."
+            }
+          }
+        }
+      ]
+    },
+    "widget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]{2,32}$",
+          "description": "Unique key of the widget: the identifier in the dashboard box, the API and the WebSocket messages."
+        },
+        "label": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/multiLanguageText"
+            }
+          ],
+          "description": "Name of the widget in the box picker and default card title, 3-30 characters per language (code-enforced)."
+        },
+        "description": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/multiLanguageText"
+            }
+          ],
+          "description": "Shown under the picker tile and on the install screen, at most 100 characters per language (code-enforced)."
+        },
+        "icon": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]{1,40}$",
+          "description": "Feather icon name; an unknown name renders the generic widget icon, never an error."
+        },
+        "settings": {
+          "type": "array",
+          "maxItems": 10,
+          "description": "Per-instance settings of the widget, the config_schema grammar restricted to non-sensitive types; `source: \"devices\"` binds an instance to one of the integration's devices.",
+          "items": {
+            "$ref": "#/definitions/widgetSettingField"
+          }
+        },
+        "action_timeout_seconds": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 120,
+          "default": 30,
+          "description": "Ack delay granted to widget.action (the same exception to the 5s command rule as manifest actions)."
+        }
+      }
+    },
+    "sceneVariable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "type", "label"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "description": "Unique key of the variable (trigger) or output (action) in its list."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "boolean"],
+          "description": "Scalars only: an identifier, a count, a short text — never an image or a file (a picture goes through POST /camera/image)."
+        },
+        "label": {
+          "$ref": "#/definitions/multiLanguageText"
+        },
+        "description": {
+          "$ref": "#/definitions/multiLanguageText"
+        }
+      }
+    },
+    "sceneSectionText": {
+      "description": "A section text of a scene trigger / action: the {{port:<name>}} placeholder is refused in every language, the scene editor never loads the container detail that resolves it (same rule as the contact_schema).",
+      "allOf": [
+        {
+          "$ref": "#/definitions/multiLanguageText"
+        },
+        {
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^(?!.*\\{\\{port:)"
+          }
+        }
+      ]
+    },
+    "sceneTriggerField": {
+      "description": "A trigger filter: same format as a config_schema entry, restricted types (no secret, no account linking, no boolean — a toggle could never express \"any\"), no {{port:<name>}} placeholder in sections.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/configField"
+        },
+        {
+          "properties": {
+            "type": {
+              "enum": ["string", "number", "select", "multi_select", "section"]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "section"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "label": {
+                "$ref": "#/definitions/sceneSectionText"
+              },
+              "description": {
+                "$ref": "#/definitions/sceneSectionText"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "sceneActionField": {
+      "description": "An action parameter: same format as a config_schema entry, restricted types (no secret, no account linking), no {{port:<name>}} placeholder in sections. `string` fields accept scene variables ({{...}}), resolved by the core before the action is sent.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/configField"
+        },
+        {
+          "properties": {
+            "type": {
+              "enum": ["string", "number", "boolean", "select", "multi_select", "section"]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "section"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "label": {
+                "$ref": "#/definitions/sceneSectionText"
+              },
+              "description": {
+                "$ref": "#/definitions/sceneSectionText"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "sceneTrigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "maxLength": 40,
+          "description": "Unique key of the trigger, fired by the integration and stored by the scenes. Never renamed once published."
+        },
+        "label": {
+          "$ref": "#/definitions/multiLanguageText"
+        },
+        "description": {
+          "$ref": "#/definitions/multiLanguageText"
+        },
+        "fields": {
+          "type": "array",
+          "maxItems": 10,
+          "description": "Filters the scene author fills in, compared with the event value of the same key (equality, or membership for a multi_select). An empty field is a wildcard; `required: true` denies the wildcard in the editor.",
+          "items": {
+            "$ref": "#/definitions/sceneTriggerField"
+          }
+        },
+        "variables": {
+          "type": "array",
+          "maxItems": 20,
+          "description": "The only data the event exposes to the scene actions ({{triggerEvent.data.<key>}}): a whitelist, every other event key is dropped.",
+          "items": {
+            "$ref": "#/definitions/sceneVariable"
+          }
+        }
+      }
+    },
+    "sceneAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "maxLength": 40,
+          "description": "Unique key of the action, stored by the scenes. Never renamed once published."
+        },
+        "label": {
+          "$ref": "#/definitions/multiLanguageText"
+        },
+        "description": {
+          "$ref": "#/definitions/multiLanguageText"
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 120,
+          "default": 30,
+          "description": "Ack delay granted to the action, connection wait included (the manifest actions exception to the 5s command rule)."
+        },
+        "fields": {
+          "type": "array",
+          "maxItems": 10,
+          "description": "Parameters of the action, filled by the scene author.",
+          "items": {
+            "$ref": "#/definitions/sceneActionField"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "maxItems": 20,
+          "description": "Values returned to the scene in the command-result `data.outputs`, exposed to the following actions as {{<column>.<row>.<key>}}: a whitelist, every other key is dropped.",
+          "items": {
+            "$ref": "#/definitions/sceneVariable"
+          }
+        }
+      }
+    }
+  }
+}
