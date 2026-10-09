@@ -16,56 +16,39 @@ test('all widget payloads pass SDK validation in both languages and unit systems
         const data = { weather: toWeather(snapshot(), units, NOW), point, run: RUN };
         const widget = forecastWidget(key, data, units, language);
         assert.deepEqual(validateWidgetContent(widget), []);
-        assert.ok(
-          widget.components[0].text.includes(language === 'fr' ? 'Météo Suisse' : 'MeteoSwiss'),
+        assert.equal(widget.components[0].text, point.name);
+        assert.equal(widget.components[0].variant, 'heading');
+        assert.equal(
+          widget.components.some((c) => c.variant === 'caption'),
+          false,
         );
         assert.equal(
           widget.components.some((c) => c.type === 'button'),
           false,
         );
-        if (key === 'forecast') {
-          const list = widget.components.find((c) => c.type === 'card-list');
-          assert.equal(list.display, 'list');
-          assert.equal(list.items.length, 8);
-          assert.ok(
-            list.items.every((day) => day.subtitle.includes('Min') && day.subtitle.includes('Max')),
-          );
-          assert.ok(list.items.every((day) => !day.date && !day.links));
-          assert.ok(
-            list.items[0].title.includes(language === 'fr' ? 'Éclaircies' : 'Partly cloudy'),
-          );
-          assert.ok(list.items[0].title.includes('9')); // Swiss date, not UTC October 8.
-          assert.ok(
-            list.items[0].subtitle.endsWith(units === 'us' ? '1 in' : '25,4 mm') ||
-              list.items[0].subtitle.endsWith('25.4 mm'),
-          );
-        } else {
-          assert.equal(
-            widget.components.find((c) => c.type === 'chart').series[0].points.length,
-            24,
-          );
-        }
+        const chart = widget.components.find((c) => c.type === 'chart');
+        assert.equal(chart.series[0].points.length, 24);
+        // A caption would be moved above the chart by Gladys, regardless of array order.
+        const footer = widget.components.at(-1);
+        assert.equal(footer.variant, 'body');
+        assert.ok(footer.text.startsWith(messages.source[language]));
+        assert.ok(footer.text.includes(language === 'fr' ? 'heure suisse' : 'Swiss time'));
       }
     }
   }
 });
 
-test('weekly forecast handles missing precipitation and unknown conditions without inventing values', () => {
+test('long locality names stay within the Gladys heading limit', () => {
   const weather = toWeather(snapshot(), 'metric', NOW);
-  delete weather.days[0].precipitation;
-  weather.days[0].weather = 'unrecognized';
-  const content = forecastWidget('forecast', { weather, point, run: RUN }, 'metric', 'fr');
-  const day = content.components.find((c) => c.type === 'card-list').items[0];
-  assert.match(day.title, /Indisponible/);
-  assert.match(day.subtitle, /— mm/);
-  assert.deepEqual(validateWidgetContent(content), []);
   const longName = { ...point, name: 'Une localité suisse avec un nom particulièrement long' };
-  assert.deepEqual(
-    validateWidgetContent(
-      forecastWidget('forecast', { weather, point: longName, run: RUN }, 'metric', 'en'),
-    ),
-    [],
+  const content = forecastWidget(
+    'temperature',
+    { weather, point: longName, run: RUN },
+    'metric',
+    'en',
   );
+  assert.equal(content.components[0].text, `${longName.name.slice(0, 39)}…`);
+  assert.deepEqual(validateWidgetContent(content), []);
 });
 
 test('each widget may override the house, even without any located house', async () => {
@@ -94,12 +77,12 @@ test('each widget may override the house, even without any located house', async
       assert.deepEqual(calls.at(-1), { location: 'Genève', units: 'metric' });
       assert.deepEqual(validateWidgetContent(ack.data.content), []);
     }
-    const other = await gladys.fake.widgetGet('forecast', { settings: { location: '1202' } });
+    const other = await gladys.fake.widgetGet('temperature', { settings: { location: '1202' } });
     assert.equal(other.success, true);
     assert.equal(calls.at(-1).location, '1202');
-    const typo = await gladys.fake.widgetGet('forecast', { settings: { location: 'typo' } });
+    const typo = await gladys.fake.widgetGet('temperature', { settings: { location: 'typo' } });
     assert.deepEqual(typo.data.content.components[0].text, messages.unknownLocation);
-    const noLocation = await gladys.fake.widgetGet('forecast');
+    const noLocation = await gladys.fake.widgetGet('temperature');
     assert.deepEqual(noLocation.data.content.components[0].text, messages.noHouse);
   } finally {
     await integration.stop();
@@ -140,6 +123,7 @@ test('SDK weather and widget handlers support multiple houses and translated fai
     });
     assert.equal(ack.success, true);
     assert.equal(ack.data.weather.hours.length, 24);
+    assert.equal(ack.data.weather.days.length, 8);
     const widget = await gladys.fake.widgetGet('wind', {
       settings: { house: 'other' },
       language: 'en',

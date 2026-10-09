@@ -10,7 +10,7 @@
 - `src/forecast.js` : format pivot Gladys, unités, périodes et codes météo.
 - `src/widgets.js` / `src/i18n.js` : contenu déclaratif et textes bilingues.
 
-Le widget météo natif consomme `onWeatherGet`. Les quatre widgets déclarés au manifeste consomment `onWidgetGet` : une liste des huit jours et trois graphiques horaires. Aucun appareil factice ni capteur n’est créé. L’accès `location: true` sert à précharger les maisons et à choisir celle des widgets supplémentaires ; les commandes météo natives contiennent déjà les coordonnées.
+Le widget météo natif consomme `onWeatherGet`. Les trois widgets déclarés au manifeste consomment `onWidgetGet` : température, précipitations et vent sur 24 heures. Les prévisions sur huit jours restent fournies au widget météo natif. Aucun appareil factice ni capteur n’est créé. L’accès `location: true` sert à précharger les maisons et à choisir celle des widgets supplémentaires ; les commandes météo natives contiennent déjà les coordonnées.
 
 Le réglage `location` de chaque widget prend priorité sur `house`. La ville ou le NPA est résolu localement dans les métadonnées postales officielles, sans géocodage tiers. Les noms sont comparés sans accents, sans distinction de casse, avec espaces/tirets normalisés. Une ville comportant plusieurs NPA utilise le plus petit NPA ; un NPA partagé entre des localités de noms différents demande une précision. Une erreur de saisie ne revient jamais à la maison. Le cache est indexé par le point officiel, donc les noms et NPA menant au même point partagent les données.
 
@@ -44,4 +44,4 @@ Le schéma `test/fixtures/manifest.schema.json` vient du cœur Gladys, consulté
 
 Les composants de chaque widget passent par `validateWidgetContent` dans les tests, en français/anglais et unités métriques/américaines. Le test réseau optionnel vérifie Lausanne et Zurich et rapporte le temps de chargement et le pic mémoire. La CI ne télécharge pas les données nationales.
 
-L’attribution apparaît dans les widgets supplémentaires et la configuration. Le format pivot météo ne possède pas de champ d’attribution ; aucun champ non reconnu n’y est ajouté.
+L’attribution apparaît sous les graphiques (texte `body`, car Gladys place toujours `caption` dans l’en-tête) et dans la configuration. Le format pivot météo ne possède pas de champ d’attribution ; aucun champ non reconnu n’y est ajouté.

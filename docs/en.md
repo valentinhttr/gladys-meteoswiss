@@ -1,6 +1,6 @@
 # MeteoSwiss
 
-Add **Forecast · 8 days** to see the entire week. Add the temperature, precipitation and wind widgets for hourly charts.
+Use the native Gladys **Weather** widget for the eight-day forecast. Add the temperature, precipitation and wind widgets for hourly charts.
 
 In each widget's settings:
 
@@ -9,10 +9,10 @@ In each widget's settings:
 
 Add multiple copies of a widget to compare locations. A custom location works even without a located house. The native Gladys weather widget continues to use its selected house.
 
-After upgrading from 1.0, add **Forecast · 8 days** from the dashboard editor. Existing hourly widgets retain their house settings. Edit their settings to choose another location.
+The extra **Forecast · 8 days** widget has been removed. If you added it, remove it from your dashboard and use the native **Weather** widget instead. The three chart widgets retain their settings.
 
 First loading can take a few minutes. Up to 20 locations are tracked per integration process. An unknown or ambiguous location displays guidance instead of silently falling back to your house.
 
-The large website buttons have been removed. The source remains visible; the website link is in the integration configuration. Gladys currently does not support links beside widget headings.
+The heading shows only the location. The source and forecast time appear below the chart as plain text. The website link is available in the integration configuration.
 
 **Source: [Météo Suisse (MeteoSwiss)](https://www.meteosuisse.admin.ch).** This independent community integration is not an official service and has no affiliation with or endorsement from MeteoSwiss. No official warnings or radar are provided.

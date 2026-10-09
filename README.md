@@ -4,9 +4,8 @@ Swiss weather forecasts for **Gladys Assistant 5.1+**, in English and French. No
 
 ## Widgets
 
-- **Forecast · 8 days** — the whole week at a glance: conditions, minimum/maximum temperatures and precipitation.
 - **Temperature, precipitation and wind · 24 hours** — hourly charts.
-- Also supplies forecasts to the native Gladys weather widget.
+- **Native Gladys weather widget** — daily forecasts for the next 8 days.
 
 Each integration widget has its own **Location** setting. Enter a Swiss town or postcode, such as `Genève`, `1201` or `1201 Genève`. Leave it empty to use your house. You can display home, work and holiday locations on the same dashboard. The native Gladys weather widget keeps using its selected house.
 

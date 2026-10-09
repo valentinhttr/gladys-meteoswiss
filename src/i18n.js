@@ -38,22 +38,6 @@ export const messages = {
   minimum: { en: 'Minimum', fr: 'Minimum' },
 };
 
-export const conditions = {
-  clear: { en: 'Sunny', fr: 'Ensoleillé' },
-  'partly-cloudy': { en: 'Partly cloudy', fr: 'Éclaircies' },
-  cloud: { en: 'Cloudy', fr: 'Nuageux' },
-  fog: { en: 'Fog', fr: 'Brouillard' },
-  drizzle: { en: 'Drizzle', fr: 'Bruine' },
-  rain: { en: 'Rain', fr: 'Pluie' },
-  pouring: { en: 'Heavy rain', fr: 'Forte pluie' },
-  sleet: { en: 'Rain and snow', fr: 'Pluie et neige' },
-  hail: { en: 'Hail', fr: 'Grêle' },
-  snow: { en: 'Snow', fr: 'Neige' },
-  thunderstorm: { en: 'Thunderstorms', fr: 'Orages' },
-  wind: { en: 'Windy', fr: 'Venteux' },
-  unknown: { en: 'Unavailable', fr: 'Indisponible' },
-};
-
 export function translate(value, language = 'en') {
   return value[language.toLowerCase().split(/[-_]/)[0]] ?? value.en;
 }

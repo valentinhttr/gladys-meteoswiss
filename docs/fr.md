@@ -1,6 +1,6 @@
 # Météo Suisse
 
-Ajoutez **Prévisions · 8 jours** pour voir toute la semaine. Les widgets température, précipitations et vent affichent les courbes horaires.
+Utilisez le widget **Météo** natif de Gladys pour les prévisions sur huit jours. Les widgets température, précipitations et vent affichent les courbes horaires.
 
 Dans les réglages de chaque widget :
 
@@ -9,10 +9,10 @@ Dans les réglages de chaque widget :
 
 Ajoutez plusieurs exemplaires d’un widget pour comparer des lieux. Une localité personnalisée fonctionne même sans maison localisée. Le widget météo natif de Gladys conserve la maison sélectionnée.
 
-Après la mise à jour depuis la version 1.0, ajoutez **Prévisions · 8 jours** dans l’éditeur de tableau de bord. Les widgets horaires existants conservent leurs réglages de maison ; modifiez-les pour choisir une autre localité.
+Le widget supplémentaire **Prévisions · 8 jours** a été retiré. Si vous l’aviez ajouté, supprimez-le de votre tableau de bord et utilisez le widget **Météo** natif à sa place. Les trois widgets graphiques conservent leurs réglages.
 
 Le premier chargement peut prendre quelques minutes. Jusqu’à 20 localités sont suivies par démarrage. Une localité inconnue ou ambiguë affiche une aide, sans revenir silencieusement à la maison.
 
-Les gros boutons vers le site ont été retirés. La source reste visible et le lien est disponible dans la configuration de l’intégration. Gladys ne permet actuellement pas de placer un lien à côté du titre d’un widget.
+Le titre affiche uniquement la localité. La source et l’heure des prévisions figurent sous le graphique, sans bouton. Le lien vers le site est disponible dans la configuration de l’intégration.
 
 **Source : [Météo Suisse (MeteoSwiss)](https://www.meteosuisse.admin.ch).** Cette intégration communautaire indépendante n’est pas un service officiel et n’est ni affiliée, ni liée, ni approuvée par Météo Suisse. Elle ne fournit pas d’alertes officielles ni de radar.
