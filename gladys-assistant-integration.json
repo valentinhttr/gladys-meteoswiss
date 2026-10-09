@@ -2,6 +2,7 @@
   "manifest_version": 1,
   "type": "weather",
   "name": "Météo Suisse / MeteoSwiss",
+  "cover_image": "https://raw.githubusercontent.com/valentinhttr/gladys-meteoswiss/main/cover.jpg",
   "description": {
     "en": "Swiss local weather forecasts from MeteoSwiss Open Data.",
     "fr": "Prévisions météo locales suisses issues des données ouvertes de MétéoSuisse."
