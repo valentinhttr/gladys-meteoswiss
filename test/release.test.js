@@ -28,6 +28,14 @@ test('initial and patch releases synchronize versions and isolate changelog entr
     ]) {
       await copyFile(file, join(dir, file));
     }
+    // Isolate the fixture baseline from the project's current release version.
+    for (const name of ['package.json', 'package-lock.json', 'gladys-assistant-integration.json']) {
+      const value = await read(name);
+      value.version = '1.0.0';
+      if (value.packages) value.packages[''].version = '1.0.0';
+      if (value.docker_image) value.docker_image = 'ghcr.io/valentinhttr/gladys-meteoswiss:1.0.0';
+      await writeFile(join(dir, name), `${JSON.stringify(value, null, 2)}\n`);
+    }
     git('init', '-b', 'main');
     git('config', 'user.name', 'Test');
     git('config', 'user.email', 'test@example.invalid');
