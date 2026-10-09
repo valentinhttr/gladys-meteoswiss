@@ -13,6 +13,6 @@ The extra **Forecast · 8 days** widget has been removed. If you added it, remov
 
 First loading can take a few minutes. Up to 20 locations are tracked per integration process. An unknown or ambiguous location displays guidance instead of silently falling back to your house.
 
-The heading shows only the location. The source and forecast time appear below the chart as plain text. The website link is available in the integration configuration.
+The heading shows only the location. The source and forecast time appear below the location in a small, muted subtitle. The website link is available in the integration configuration.
 
 **Source: [Météo Suisse (MeteoSwiss)](https://www.meteosuisse.admin.ch).** This independent community integration is not an official service and has no affiliation with or endorsement from MeteoSwiss. No official warnings or radar are provided.

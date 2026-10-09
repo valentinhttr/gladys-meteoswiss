@@ -20,6 +20,11 @@ export function forecastWidget(key, { weather, point, run }, units, language) {
       variant: 'heading',
       text: heading.length > 40 ? `${heading.slice(0, 39)}…` : heading,
     },
+    {
+      type: 'text',
+      variant: 'caption',
+      text: `${translate(messages.source, language)} · ${updated} · ${locale === 'fr-CH' ? 'Prévision · heure suisse' : 'Forecast · Swiss time'}`,
+    },
   ];
   const hours = weather.hours;
   const fields = key === 'wind' ? ['wind_speed', 'wind_gust'] : [key];
@@ -77,12 +82,6 @@ export function forecastWidget(key, { weather, point, run }, units, language) {
         unit,
         title: messages.total,
         series,
-      },
-      {
-        type: 'text',
-        // Gladys renders body text below the chart; captions always go in the header.
-        variant: 'body',
-        text: `${translate(messages.source, language)} · ${updated} · ${locale === 'fr-CH' ? 'Prévision · heure suisse' : 'Forecast · Swiss time'}`,
       },
     ],
   };

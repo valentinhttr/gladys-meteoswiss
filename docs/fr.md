@@ -13,6 +13,6 @@ Le widget supplémentaire **Prévisions · 8 jours** a été retiré. Si vous l�
 
 Le premier chargement peut prendre quelques minutes. Jusqu’à 20 localités sont suivies par démarrage. Une localité inconnue ou ambiguë affiche une aide, sans revenir silencieusement à la maison.
 
-Le titre affiche uniquement la localité. La source et l’heure des prévisions figurent sous le graphique, sans bouton. Le lien vers le site est disponible dans la configuration de l’intégration.
+Le titre affiche uniquement la localité. La source et l’heure des prévisions figurent en petit et grisé sous la localité, sans bouton. Le lien vers le site est disponible dans la configuration de l’intégration.
 
 **Source : [Météo Suisse (MeteoSwiss)](https://www.meteosuisse.admin.ch).** Cette intégration communautaire indépendante n’est pas un service officiel et n’est ni affiliée, ni liée, ni approuvée par Météo Suisse. Elle ne fournit pas d’alertes officielles ni de radar.

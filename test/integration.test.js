@@ -19,7 +19,7 @@ test('all widget payloads pass SDK validation in both languages and unit systems
         assert.equal(widget.components[0].text, point.name);
         assert.equal(widget.components[0].variant, 'heading');
         assert.equal(
-          widget.components.some((c) => c.variant === 'caption'),
+          widget.components.some((c) => c.variant === 'body'),
           false,
         );
         assert.equal(
@@ -28,11 +28,10 @@ test('all widget payloads pass SDK validation in both languages and unit systems
         );
         const chart = widget.components.find((c) => c.type === 'chart');
         assert.equal(chart.series[0].points.length, 24);
-        // A caption would be moved above the chart by Gladys, regardless of array order.
-        const footer = widget.components.at(-1);
-        assert.equal(footer.variant, 'body');
-        assert.ok(footer.text.startsWith(messages.source[language]));
-        assert.ok(footer.text.includes(language === 'fr' ? 'heure suisse' : 'Swiss time'));
+        const subtitle = widget.components[1];
+        assert.equal(subtitle.variant, 'caption');
+        assert.ok(subtitle.text.startsWith(messages.source[language]));
+        assert.ok(subtitle.text.includes(language === 'fr' ? 'heure suisse' : 'Swiss time'));
       }
     }
   }

@@ -14,7 +14,7 @@ Le widget météo natif consomme `onWeatherGet`. Les trois widgets déclarés au
 
 Le réglage `location` de chaque widget prend priorité sur `house`. La ville ou le NPA est résolu localement dans les métadonnées postales officielles, sans géocodage tiers. Les noms sont comparés sans accents, sans distinction de casse, avec espaces/tirets normalisés. Une ville comportant plusieurs NPA utilise le plus petit NPA ; un NPA partagé entre des localités de noms différents demande une précision. Une erreur de saisie ne revient jamais à la maison. Le cache est indexé par le point officiel, donc les noms et NPA menant au même point partagent les données.
 
-La liste hebdomadaire utilise `card-list` en mode `list`, sans défilement interne. Les jours sont formatés dans le fuseau suisse. Les champs `date` sont omis car Gladys les afficherait à la place des sous-titres contenant les températures et précipitations. Le contrat Gladys ne permet pas de lien dans les titres ; les boutons de site sont retirés et le lien est disponible dans la configuration, avec attribution dans chaque widget.
+Les graphiques utilisent un titre limité à la localité et un sous-titre `caption` pour la source et l’heure des prévisions. Gladys affiche ce sous-titre en petit et grisé. Le lien vers le site est disponible dans la configuration.
 
 ## Données
 
@@ -44,4 +44,4 @@ Le schéma `test/fixtures/manifest.schema.json` vient du cœur Gladys, consulté
 
 Les composants de chaque widget passent par `validateWidgetContent` dans les tests, en français/anglais et unités métriques/américaines. Le test réseau optionnel vérifie Lausanne et Zurich et rapporte le temps de chargement et le pic mémoire. La CI ne télécharge pas les données nationales.
 
-L’attribution apparaît sous les graphiques (texte `body`, car Gladys place toujours `caption` dans l’en-tête) et dans la configuration. Le format pivot météo ne possède pas de champ d’attribution ; aucun champ non reconnu n’y est ajouté.
+L’attribution apparaît dans le sous-titre des graphiques et dans la configuration. Le format pivot météo ne possède pas de champ d’attribution ; aucun champ non reconnu n’y est ajouté.
