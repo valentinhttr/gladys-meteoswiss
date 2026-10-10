@@ -3,6 +3,7 @@ import { coordinatesValid } from './locations.js';
 import { messages, ProviderError, translate } from './i18n.js';
 import { forecastWidget, messageWidget } from './widgets.js';
 import { SceneTriggers } from './scenes.js';
+import { WarningScenes } from './warning-scenes.js';
 
 async function withinDeadline(operation) {
   let timer;
@@ -18,11 +19,74 @@ async function withinDeadline(operation) {
   }
 }
 
-export function registerIntegration(gladys, provider, logger = console) {
+export function registerIntegration(gladys, provider, logger = console, warnings = null) {
   let houses = [];
   let housesLoaded = false;
   let stopped = false;
   let warming;
+  let loadingHouses;
+  let weatherRefreshTimer;
+  let lastWeatherRefresh = -Infinity;
+  let warningDigest;
+  const now = provider.now ?? Date.now;
+  const warningScenes = warnings
+    ? new WarningScenes({
+        gladys,
+        warnings,
+        cacheDir: provider.cacheDir,
+        now,
+        logger,
+      })
+    : null;
+  // Gladys accepts only one weather-refresh nudge per minute. Coalesce forecast
+  // and warning updates so an alert arriving after a forecast is not dropped.
+  function requestWeatherRefresh() {
+    if (stopped || !gladys.connected) return;
+    clearTimeout(weatherRefreshTimer);
+    const delay = Math.max(0, lastWeatherRefresh + 61_000 - now());
+    if (delay) {
+      weatherRefreshTimer = setTimeout(requestWeatherRefresh, delay);
+      weatherRefreshTimer.unref();
+    } else {
+      lastWeatherRefresh = now();
+      gladys.requestWeatherRefresh();
+    }
+  }
+  function locatedHouses() {
+    return houses.filter(
+      (house) => house.selector && coordinatesValid(house.latitude, house.longitude),
+    );
+  }
+  async function evaluateWarnings() {
+    if (stopped || !housesLoaded || !warningScenes) return;
+    const digest = JSON.stringify(
+      locatedHouses().map((house) => [
+        house.selector,
+        warnings.weatherAlerts({ ...house, language: 'en' }),
+        warnings.weatherAlerts({ ...house, language: 'fr' }),
+      ]),
+    );
+    if (digest !== warningDigest) {
+      warningDigest = digest;
+      requestWeatherRefresh();
+    }
+    await warningScenes.evaluate(locatedHouses());
+  }
+  function loadHouses() {
+    if (loadingHouses) return loadingHouses;
+    loadingHouses = (async () => {
+      const loaded = await gladys.getHouses();
+      if (stopped) return;
+      houses = loaded;
+      housesLoaded = true;
+      await evaluateWarnings();
+    })()
+      .catch((error) => logger.warn('Cannot refresh warning houses', { error: error.message }))
+      .finally(() => {
+        loadingHouses = null;
+      });
+    return loadingHouses;
+  }
   const scenes = new SceneTriggers({
     gladys,
     getForecast: (house) => withinDeadline(provider.get({ ...house, units: 'metric' })),
@@ -33,15 +97,12 @@ export function registerIntegration(gladys, provider, logger = console) {
   function evaluateScenes() {
     // An early refresh must not mistake an unloaded inventory for deleted houses.
     if (stopped || !housesLoaded) return Promise.resolve();
-    return scenes.evaluate(
-      houses.filter((house) => house.selector && coordinatesValid(house.latitude, house.longitude)),
-    );
+    return scenes.evaluate(locatedHouses());
   }
   async function warm() {
     if (warming) return warming;
     warming = (async () => {
-      houses = await gladys.getHouses();
-      housesLoaded = true;
+      await loadHouses();
       for (const house of houses) {
         if (stopped) return;
         if (!coordinatesValid(house.latitude, house.longitude)) continue;
@@ -65,7 +126,9 @@ export function registerIntegration(gladys, provider, logger = console) {
 
   gladys.onWeatherGet(async (options) => {
     try {
-      return (await withinDeadline(provider.get(options))).weather;
+      const weather = (await withinDeadline(provider.get(options))).weather;
+      const alerts = warnings?.weatherAlerts(options);
+      return alerts === undefined ? weather : { ...weather, alerts };
     } catch (error) {
       throw new Error(translate(messages[error.code] ?? messages.unavailable, options.language));
     }
@@ -91,7 +154,20 @@ export function registerIntegration(gladys, provider, logger = console) {
       }
     });
   }
-  gladys.on('connected', warm);
+  function connected() {
+    warningDigest = undefined;
+    void loadHouses();
+    void warnings?.refresh();
+    void warm();
+  }
+  gladys.on('connected', connected);
+  // A slow forecast download must not hold up changes to warning destinations.
+  const houseTimer = warnings
+    ? setInterval(() => {
+        if (gladys.connected) void loadHouses();
+      }, 60_000)
+    : null;
+  houseTimer?.unref();
   // Also notices changed house coordinates: Gladys has no house-update event.
   const timer = setInterval(() => {
     void warm();
@@ -100,13 +176,17 @@ export function registerIntegration(gladys, provider, logger = console) {
   return {
     warm,
     evaluateScenes,
+    evaluateWarnings,
+    requestWeatherRefresh,
     async stop() {
       stopped = true;
       clearInterval(timer);
-      gladys.off('connected', warm);
-      await scenes.stop();
-      await provider.stop();
+      clearInterval(houseTimer);
+      clearTimeout(weatherRefreshTimer);
+      gladys.off('connected', connected);
+      await Promise.all([scenes.stop(), warningScenes?.stop(), provider.stop(), warnings?.stop()]);
       await warming;
+      await loadingHouses;
     },
   };
 }

@@ -71,8 +71,15 @@ export function evaluateForecast(weather, rule, threshold, horizon, now) {
 }
 
 export class SceneTriggers {
-  constructor({ gladys, getForecast, cacheDir = null, now = Date.now, logger = console }) {
-    Object.assign(this, { gladys, getForecast, cacheDir, now, logger });
+  constructor({
+    gladys,
+    getForecast,
+    cacheDir = null,
+    now = Date.now,
+    logger = console,
+    stateFile = 'scene-state.json',
+  }) {
+    Object.assign(this, { gladys, getForecast, cacheDir, now, logger, stateFile });
     this.active = new Set();
     this.dirty = false;
     this.sendTimes = [];
@@ -81,7 +88,7 @@ export class SceneTriggers {
   async restore() {
     if (!this.cacheDir) return;
     try {
-      const raw = await readFile(join(this.cacheDir, 'scene-state.json'), 'utf8');
+      const raw = await readFile(join(this.cacheDir, this.stateFile), 'utf8');
       if (raw.length > 1_000_000) throw new Error('Scene state too large');
       const state = JSON.parse(raw);
       if (state.version !== 1 || !Array.isArray(state.active))
@@ -97,7 +104,7 @@ export class SceneTriggers {
     if (!this.cacheDir || !this.dirty) return;
     try {
       await mkdir(this.cacheDir, { recursive: true });
-      const path = join(this.cacheDir, 'scene-state.json');
+      const path = join(this.cacheDir, this.stateFile);
       await writeFile(`${path}.tmp`, JSON.stringify({ version: 1, active: [...this.active] }), {
         mode: 0o600,
       });

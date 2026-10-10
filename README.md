@@ -1,6 +1,6 @@
 # MeteoSwiss for Gladys
 
-Swiss weather forecasts for **Gladys Assistant 5.1+**, in English and French. No account or API key needed.
+Swiss weather forecasts and official MeteoSwiss warnings for **Gladys Assistant 5.1+**, in English and French. No account or API key needed.
 
 ## Widgets
 
@@ -15,13 +15,15 @@ Automate scenes when **precipitation, frost, high temperatures or strong gusts**
 
 Forecasts are checked every 15 minutes, even without widgets. Each risk fires once until a complete forecast window clears it; state is preserved across restarts when `/data` is writable. These events use forecasts, not official warnings. See the [user guide](docs/en.md#scene-triggers) for variables and behavior.
 
+**Official MeteoSwiss warning** is a separate trigger. Choose the house, phenomenon and minimum danger level (2–5) directly in the scene. The official hazard-map feed is checked at startup and every **60 seconds**, independently of forecast downloads. New warnings and increases in danger level fire on receipt, including warnings for a future period. [Details and examples](docs/en.md#official-warnings).
+
 ## Install
 
 1. In Gladys external integrations, add `https://github.com/valentinhttr/gladys-meteoswiss`.
 2. Allow house-location access and add the widgets to your dashboard.
 3. Set a **Location** per widget if needed. Allow a few minutes for the first download.
 
-Forecasts only; no official warnings or radar. The official data is distributed as national files, so refreshes can download several hundred MB. An unmetered connection is recommended.
+Forecast data is distributed as national files, so forecast refreshes can download several hundred MB. An unmetered connection is recommended. Warning checks use small separate JSON files. Radar is not provided.
 
 ## Credits & disclaimer
 

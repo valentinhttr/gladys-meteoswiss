@@ -45,4 +45,24 @@ State is stored in `/data/scene-state.json` to prevent repeats after reconnectin
 
 Following actions can use `{{triggerEvent.data.house_name}}`, `{{triggerEvent.data.location}}`, `{{triggerEvent.data.value}}`, `{{triggerEvent.data.unit}}`, `{{triggerEvent.data.threshold}}` and `{{triggerEvent.data.horizon_hours}}`. `{{triggerEvent.data.forecast_at}}` is the UTC end of the first hour reaching the threshold; `{{triggerEvent.data.house}}` is the house selector.
 
-**Source: [Météo Suisse (MeteoSwiss)](https://www.meteosuisse.admin.ch).** This independent community integration is not an official service and has no affiliation with or endorsement from MeteoSwiss. Triggers use forecasts and do not replace a local sensor for equipment protection. No official warnings or radar are provided.
+## Official warnings
+
+Add **Integrations → MeteoSwiss → Official MeteoSwiss warning** to a scene. Select:
+
+- **House**: one house, or leave empty for all located houses.
+- **Phenomenon**: wind, thunderstorms, rain, snow, slippery roads, heat wave or frost. Leave empty for all seven.
+- **Minimum danger level**: 2 (moderate), 3 (considerable), 4 (high) or 5 (very high). A threshold of 3 also accepts levels 4 and 5.
+
+For example, **House = Home, Phenomenon = Thunderstorms, Minimum = 3** can send a notification as soon as a confirmed thunderstorm warning arrives. A separate **Wind, Minimum = 2** scene can retract awnings. The official degree is a danger category, not a wind-speed threshold; the forecast triggers above remain available for numeric thresholds.
+
+The official hazard-map feed is checked immediately at startup, then every **60 seconds**, even without widgets and independently of forecast downloads. The upstream index also has a 60-second cache: allow roughly **one to two minutes after web publication** under normal conditions, plus network/delivery time. This is polling, not the MeteoSwiss app's push channel. Longer upstream cache directives, server-requested retry delays and outages take precedence; errors retry after 1, 2, 4, then 5 minutes. No integration can deliver a warning before MeteoSwiss publishes it.
+
+An event fires on receipt of a new confirmed warning, even if its start is in the future, and again if its degree exceeds the highest already reported for that warning. Decreases, wording changes and extensions of the end time do not repeat it. Expired warnings, preliminary outlooks, lake/airfield warnings and other agencies' natural hazards (floods, avalanches, forest fires, drought) are excluded. Houses are matched locally against the simplified boundaries used by the official map, not against the nearest forecast town. Near a boundary, consult the official map; this is regional information, not a measurement at the house. House changes are checked every minute.
+
+Variables: `{{triggerEvent.data.house_name}}`, `{{triggerEvent.data.phenomenon}}` (stable code such as `thunderstorm`), `{{triggerEvent.data.level}}`, `{{triggerEvent.data.starts_at}}`, `{{triggerEvent.data.ends_at}}` (UTC), and `{{triggerEvent.data.source_url}}` for the official map. For example: “MeteoSwiss warning: {{triggerEvent.data.phenomenon}}, level {{triggerEvent.data.level}} for {{triggerEvent.data.house_name}}.”
+
+Warning state is persisted separately in `/data/warning-scene-state.json`. Reconnecting or restarting does not replay acknowledged warnings when this volume is writable. Creating a scene during an already reported warning also does not replay it. Failed sends retry; a lost acknowledgement can still cause a duplicate. A confirmed cancellation rearms the warning. Unavailable data does not clear this state. After three minutes without a successful feed check, the integration stops publishing from the old feed. Large installations are limited to 50 warning-event attempts per minute; pending work is reevaluated using current data.
+
+Official warnings are also included in native Gladys weather responses, with the original French/English description and source link. The numeric degrees 2–5 map to Gladys severities `minor`, `moderate`, `severe`, `extreme`; slippery roads have no equivalent Gladys type. The direct integration trigger above is the fastest path and works while forecasts are still loading. Native weather refreshes share Gladys's one-per-minute limit and require an available forecast. Unavailable warning data is omitted, never reported as an empty list. For descriptions beyond Gladys's size limit, the source link replaces the text.
+
+**Source: [Météo Suisse (MeteoSwiss)](https://www.meteosuisse.admin.ch).** This independent community integration is not an official service and has no affiliation with or endorsement from MeteoSwiss. Forecasts and regional warnings complement a local sensor for equipment protection. Radar is not provided.

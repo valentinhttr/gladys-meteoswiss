@@ -4,6 +4,14 @@ Source of weather data: MeteoSwiss (MétéoSuisse).
 Data terms: https://opendatadocs.meteoswiss.ch/
 No proprietary MeteoSwiss graphics are included.
 
+src/data/warning-regions.json contains geographic data from the official
+MeteoSwiss hazard map, retrieved on 2026-10-10 (source URL in the file).
+Only geographic coordinates, region identifiers and segment references are
+retained; no website JavaScript is executed or redistributed.
+Official warnings are read from the public MeteoSwiss hazard-map web product:
+https://www.meteosuisse.admin.ch/services-et-publications/applications/dangers.html
+Source: MeteoSwiss. The integration is independent of MeteoSwiss.
+
 test/fixtures/manifest.schema.json is reproduced from Gladys Assistant:
 https://github.com/GladysAssistant/Gladys/blob/master/server/lib/external-integration/manifest.schema.json
 Copyright Gladys Assistant contributors. Licensed under Apache License 2.0.

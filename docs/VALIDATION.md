@@ -1,5 +1,16 @@
 # Validation
 
+## Alertes officielles — 10 octobre 2026
+
+- `npm test` : **63 tests réussis**, dont 13 nouveaux tests pour le flux officiel, les régions, le ciblage par maison, les seuils par scène, les alertes futures, l’escalade, l’expiration, les erreurs, la reprise, la persistance et les rafraîchissements natifs différés. Les tests utilisent le SDK npm 0.14.0 avec ses entrées/sorties substituées.
+- `npm run check` et `git diff --check` : réussis. Le manifeste et ses traductions comprennent le déclencheur `official_warning` ; les versions de publication restent synchronisées.
+- `npm audit --omit=dev` : aucune vulnérabilité de production signalée.
+- Image locale `gladys-meteoswiss:official-warnings-check` construite avec Node.js 24 Alpine. Chargement des modules d’alertes et des régions vérifié sans réseau, sans droits root et avec racine en lecture seule.
+- Contrôle réel du flux web le 10 octobre 2026 à 15:29 UTC : format actif `v3`, publication `20261010_1429`, prochaine vérification de l’index prévue après 60 secondes. Les fichiers français et anglais sont accessibles. Les réponses pour Lausanne, Zurich et Genève contiennent une liste vide d’alertes météo confirmées retenues. Le contrôle n’a pas attendu le cycle suivant : le délai a été vérifié dans `nextCheck` et dans les tests.
+- Import des 491 polygones de la carte officielle, avec URL source conservée dans `src/data/warning-regions.json`. Points représentatifs vérifiés pour Lausanne, Zurich, Genève et Berne ; coordonnées extérieures et limites partagées couvertes par les tests.
+- Aucun épisode météo actif ni notification sur une instance Gladys réelle n’a été observé durant ce contrôle. Les alertes actives, annulations et escalades sont simulées. Le délai d’environ une à deux minutes est une estimation fondée sur le cycle local et le cache amont de 60 secondes, pas une mesure de bout en bout ni une garantie.
+- Aucune nouvelle release, image distante ou étiquette de version publiée pour cette implémentation.
+
 ## Maintenance et génération des releases — 10 octobre 2026
 
 - `npm test` : **50 tests réussis**, dont 8 tests de release exécutés dans des dépôts Git temporaires.

@@ -4,8 +4,8 @@
   "name": "Météo Suisse / MeteoSwiss",
   "cover_image": "https://raw.githubusercontent.com/valentinhttr/gladys-meteoswiss/main/cover.jpg",
   "description": {
-    "en": "Swiss local weather forecasts from MeteoSwiss Open Data.",
-    "fr": "Prévisions météo locales suisses issues des données ouvertes de MétéoSuisse."
+    "en": "Swiss forecasts and official MeteoSwiss weather warnings.",
+    "fr": "Prévisions suisses et alertes météorologiques officielles MétéoSuisse."
   },
   "version": "1.2.0",
   "docker_image": "ghcr.io/valentinhttr/gladys-meteoswiss:1.2.0",
@@ -949,6 +949,203 @@
           "label": {
             "en": "Forecast window (hours)",
             "fr": "Période surveillée (heures)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "official_warning",
+      "label": {
+        "en": "Official MeteoSwiss warning",
+        "fr": "Alerte officielle MétéoSuisse"
+      },
+      "description": {
+        "en": "Triggers upon receipt of a new warning or a higher danger level for this house, including future warnings. Preliminary outlooks are excluded.",
+        "fr": "Déclenche à réception d’une nouvelle alerte ou d’un degré supérieur pour cette maison, même avant son début. Les préalertes sont exclues."
+      },
+      "fields": [
+        {
+          "key": "house",
+          "type": "select",
+          "source": "houses",
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "required": false,
+          "description": {
+            "en": "Leave empty for all located houses.",
+            "fr": "Laissez vide pour toutes les maisons localisées."
+          }
+        },
+        {
+          "key": "phenomenon",
+          "type": "select",
+          "required": false,
+          "label": {
+            "en": "Phenomenon",
+            "fr": "Phénomène"
+          },
+          "description": {
+            "en": "Leave empty for all weather phenomena.",
+            "fr": "Laissez vide pour tous les phénomènes météo."
+          },
+          "options": [
+            {
+              "value": "wind",
+              "label": {
+                "en": "Wind",
+                "fr": "Vent"
+              }
+            },
+            {
+              "value": "thunderstorm",
+              "label": {
+                "en": "Thunderstorms",
+                "fr": "Orages"
+              }
+            },
+            {
+              "value": "rain",
+              "label": {
+                "en": "Rain",
+                "fr": "Pluie"
+              }
+            },
+            {
+              "value": "snow",
+              "label": {
+                "en": "Snow",
+                "fr": "Neige"
+              }
+            },
+            {
+              "value": "slippery-roads",
+              "label": {
+                "en": "Slippery roads",
+                "fr": "Chaussées glissantes"
+              }
+            },
+            {
+              "value": "heat-wave",
+              "label": {
+                "en": "Heat wave",
+                "fr": "Canicule"
+              }
+            },
+            {
+              "value": "frost",
+              "label": {
+                "en": "Frost",
+                "fr": "Gel"
+              }
+            }
+          ]
+        },
+        {
+          "key": "minimum_level",
+          "type": "select",
+          "required": true,
+          "default": "2",
+          "label": {
+            "en": "Minimum danger level",
+            "fr": "Degré de danger minimum"
+          },
+          "options": [
+            {
+              "value": "2",
+              "label": {
+                "en": "2 — Moderate danger or higher",
+                "fr": "2 — Danger limité ou supérieur"
+              }
+            },
+            {
+              "value": "3",
+              "label": {
+                "en": "3 — Considerable danger or higher",
+                "fr": "3 — Danger marqué ou supérieur"
+              }
+            },
+            {
+              "value": "4",
+              "label": {
+                "en": "4 — High danger or higher",
+                "fr": "4 — Fort danger ou supérieur"
+              }
+            },
+            {
+              "value": "5",
+              "label": {
+                "en": "5 — Very high danger",
+                "fr": "5 — Très fort danger"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House identifier",
+            "fr": "Identifiant de la maison"
+          }
+        },
+        {
+          "key": "house_name",
+          "type": "string",
+          "label": {
+            "en": "House name",
+            "fr": "Nom de la maison"
+          }
+        },
+        {
+          "key": "phenomenon",
+          "type": "string",
+          "label": {
+            "en": "Phenomenon",
+            "fr": "Phénomène"
+          }
+        },
+        {
+          "key": "level",
+          "type": "number",
+          "label": {
+            "en": "Official danger level (2–5)",
+            "fr": "Degré officiel (2–5)"
+          }
+        },
+        {
+          "key": "starts_at",
+          "type": "string",
+          "label": {
+            "en": "Warning starts (UTC)",
+            "fr": "Début de l’alerte (UTC)"
+          }
+        },
+        {
+          "key": "ends_at",
+          "type": "string",
+          "label": {
+            "en": "Warning ends (UTC)",
+            "fr": "Fin de l’alerte (UTC)"
+          }
+        },
+        {
+          "key": "source",
+          "type": "string",
+          "label": {
+            "en": "Source",
+            "fr": "Source"
+          }
+        },
+        {
+          "key": "source_url",
+          "type": "string",
+          "label": {
+            "en": "Official hazard map",
+            "fr": "Carte officielle des dangers"
           }
         }
       ]
