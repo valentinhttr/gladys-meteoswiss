@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0 (2026-10-10)
+
+### Features
+
+- feat(warnings): add official MeteoSwiss alerts with one-minute polling ([fb14e27](https://github.com/valentinhttr/gladys-meteoswiss/commit/fb14e272feb6a99b52a07f9ff3dbe617a64de00a)) by @valentinhttr
+
+**Full Changelog**: https://github.com/valentinhttr/gladys-meteoswiss/compare/v1.2.0...v1.3.0
+
 ## 1.2.0 (2026-10-10)
 
 ### Features / Fonctionnalités
