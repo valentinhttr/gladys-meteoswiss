@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0 (2026-10-10)
+
+### Features / Fonctionnalités
+
+- feat: add weather scene triggers with per-scene thresholds and forecast windows (d3e6183)
+
 ## 1.1.4 (2026-10-09)
 
 ### Fixes / Corrections
