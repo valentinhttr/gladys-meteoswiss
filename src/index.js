@@ -12,6 +12,7 @@ const provider = new MeteoSwissProvider({
     await gladys.setConnectionStatus(true);
     gladys.requestWeatherRefresh();
     for (const key of WIDGET_KEYS) gladys.requestWidgetRefresh(key);
+    await integration.evaluateScenes();
   },
   onError: () => gladys.setConnectionStatus(false, messages.unavailable),
 });

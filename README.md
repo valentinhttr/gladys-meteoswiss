@@ -9,6 +9,12 @@ Swiss weather forecasts for **Gladys Assistant 5.1+**, in English and French. No
 
 Each integration widget has its own **Location** setting. Enter a Swiss town or postcode, such as `Genève`, `1201` or `1201 Genève`. Leave it empty to use your house. You can display home, work and holiday locations on the same dashboard. The native Gladys weather widget keeps using its selected house.
 
+## Scene triggers
+
+Automate scenes when **precipitation, frost, high temperatures or strong gusts** appear in the forecast for your Gladys houses. Choose the house, threshold and forecast window directly in each scene trigger. Each scene has its own settings, selected from predefined values. By default: 0.2 mm in an hour, ≤ 0 °C, ≥ 30 °C and ≥ 50 km/h, within six hourly intervals including the current one.
+
+Forecasts are checked every 15 minutes, even without widgets. Each risk fires once until a complete forecast window clears it; state is preserved across restarts when `/data` is writable. These events use forecasts, not official warnings. See the [user guide](docs/en.md#scene-triggers) for variables and behavior.
+
 ## Install
 
 1. In Gladys external integrations, add `https://github.com/valentinhttr/gladys-meteoswiss`.

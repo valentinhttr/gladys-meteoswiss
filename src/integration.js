@@ -2,6 +2,7 @@ import { WIDGET_KEYS } from './constants.js';
 import { coordinatesValid } from './locations.js';
 import { messages, ProviderError, translate } from './i18n.js';
 import { forecastWidget, messageWidget } from './widgets.js';
+import { SceneTriggers } from './scenes.js';
 
 async function withinDeadline(operation) {
   let timer;
@@ -19,12 +20,28 @@ async function withinDeadline(operation) {
 
 export function registerIntegration(gladys, provider, logger = console) {
   let houses = [];
+  let housesLoaded = false;
   let stopped = false;
   let warming;
+  const scenes = new SceneTriggers({
+    gladys,
+    getForecast: (house) => withinDeadline(provider.get({ ...house, units: 'metric' })),
+    cacheDir: provider.cacheDir,
+    now: provider.now,
+    logger,
+  });
+  function evaluateScenes() {
+    // An early refresh must not mistake an unloaded inventory for deleted houses.
+    if (stopped || !housesLoaded) return Promise.resolve();
+    return scenes.evaluate(
+      houses.filter((house) => house.selector && coordinatesValid(house.latitude, house.longitude)),
+    );
+  }
   async function warm() {
     if (warming) return warming;
     warming = (async () => {
       houses = await gladys.getHouses();
+      housesLoaded = true;
       for (const house of houses) {
         if (stopped) return;
         if (!coordinatesValid(house.latitude, house.longitude)) continue;
@@ -34,7 +51,10 @@ export function registerIntegration(gladys, provider, logger = console) {
           logger.warn('House outside forecast coverage or unavailable', { error: error.message });
         }
       }
-      if (!stopped) void provider.refresh();
+      if (!stopped) {
+        await provider.refresh();
+        await evaluateScenes();
+      }
     })()
       .catch((error) => logger.warn('Cannot preload houses', { error: error.message }))
       .finally(() => {
@@ -79,11 +99,14 @@ export function registerIntegration(gladys, provider, logger = console) {
   timer.unref();
   return {
     warm,
+    evaluateScenes,
     async stop() {
       stopped = true;
       clearInterval(timer);
       gladys.off('connected', warm);
+      await scenes.stop();
       await provider.stop();
+      await warming;
     },
   };
 }

@@ -176,5 +176,782 @@
         }
       ]
     }
+  ],
+  "scene_triggers": [
+    {
+      "key": "precipitation_expected",
+      "label": {
+        "en": "Precipitation expected",
+        "fr": "Précipitations prévues"
+      },
+      "description": {
+        "en": "Triggers once when the selected forecast threshold is reached. Another event requires a complete forecast window without this risk first.",
+        "fr": "Déclenche une fois lorsque le seuil choisi apparaît dans les prévisions. Un nouvel événement nécessite d’abord une période complète sans ce risque."
+      },
+      "fields": [
+        {
+          "key": "house",
+          "type": "select",
+          "source": "houses",
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "required": false,
+          "description": {
+            "en": "Leave empty for all located houses.",
+            "fr": "Laissez vide pour toutes les maisons localisées."
+          }
+        },
+        {
+          "key": "threshold_choice",
+          "type": "select",
+          "required": true,
+          "default": "0.2",
+          "label": {
+            "en": "Precipitation at or above",
+            "fr": "Précipitations supérieures ou égales à"
+          },
+          "options": [
+            {
+              "value": "0.2",
+              "label": {
+                "en": "0.2 mm",
+                "fr": "0,2 mm"
+              }
+            },
+            {
+              "value": "1",
+              "label": {
+                "en": "1 mm",
+                "fr": "1 mm"
+              }
+            },
+            {
+              "value": "2",
+              "label": {
+                "en": "2 mm",
+                "fr": "2 mm"
+              }
+            },
+            {
+              "value": "5",
+              "label": {
+                "en": "5 mm",
+                "fr": "5 mm"
+              }
+            },
+            {
+              "value": "10",
+              "label": {
+                "en": "10 mm",
+                "fr": "10 mm"
+              }
+            }
+          ],
+          "description": {
+            "en": "Amount in one hour, including rain and snow.",
+            "fr": "Quantité sur une heure, pluie et neige incluses."
+          }
+        },
+        {
+          "key": "horizon_choice",
+          "type": "select",
+          "required": true,
+          "default": "6",
+          "label": {
+            "en": "Forecast window",
+            "fr": "Période à surveiller"
+          },
+          "description": {
+            "en": "Includes the current hourly interval. Forecast timestamps mark the end of the hour.",
+            "fr": "Inclut l’intervalle horaire en cours. Les dates des prévisions indiquent la fin de l’heure."
+          },
+          "options": [
+            {
+              "value": "1",
+              "label": {
+                "en": "1 hour",
+                "fr": "1 heure"
+              }
+            },
+            {
+              "value": "3",
+              "label": {
+                "en": "3 hours",
+                "fr": "3 heures"
+              }
+            },
+            {
+              "value": "6",
+              "label": {
+                "en": "6 hours",
+                "fr": "6 heures"
+              }
+            },
+            {
+              "value": "12",
+              "label": {
+                "en": "12 hours",
+                "fr": "12 heures"
+              }
+            },
+            {
+              "value": "24",
+              "label": {
+                "en": "24 hours",
+                "fr": "24 heures"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House identifier",
+            "fr": "Identifiant de la maison"
+          }
+        },
+        {
+          "key": "house_name",
+          "type": "string",
+          "label": {
+            "en": "House name",
+            "fr": "Nom de la maison"
+          }
+        },
+        {
+          "key": "location",
+          "type": "string",
+          "label": {
+            "en": "Forecast locality",
+            "fr": "Localité des prévisions"
+          }
+        },
+        {
+          "key": "forecast_at",
+          "type": "string",
+          "label": {
+            "en": "End of first affected hour (UTC)",
+            "fr": "Fin de la première heure concernée (UTC)"
+          }
+        },
+        {
+          "key": "value",
+          "type": "number",
+          "label": {
+            "en": "Forecast value",
+            "fr": "Valeur prévue"
+          }
+        },
+        {
+          "key": "unit",
+          "type": "string",
+          "label": {
+            "en": "Unit",
+            "fr": "Unité"
+          }
+        },
+        {
+          "key": "threshold",
+          "type": "number",
+          "label": {
+            "en": "Threshold",
+            "fr": "Seuil"
+          }
+        },
+        {
+          "key": "horizon_hours",
+          "type": "number",
+          "label": {
+            "en": "Forecast window (hours)",
+            "fr": "Période surveillée (heures)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "frost_expected",
+      "label": {
+        "en": "Frost risk",
+        "fr": "Risque de gel"
+      },
+      "description": {
+        "en": "Triggers once when the selected forecast threshold is reached. Another event requires a complete forecast window without this risk first.",
+        "fr": "Déclenche une fois lorsque le seuil choisi apparaît dans les prévisions. Un nouvel événement nécessite d’abord une période complète sans ce risque."
+      },
+      "fields": [
+        {
+          "key": "house",
+          "type": "select",
+          "source": "houses",
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "required": false,
+          "description": {
+            "en": "Leave empty for all located houses.",
+            "fr": "Laissez vide pour toutes les maisons localisées."
+          }
+        },
+        {
+          "key": "threshold_choice",
+          "type": "select",
+          "required": true,
+          "default": "0",
+          "label": {
+            "en": "Temperature at or below",
+            "fr": "Température inférieure ou égale à"
+          },
+          "options": [
+            {
+              "value": "-5",
+              "label": {
+                "en": "-5 °C",
+                "fr": "-5 °C"
+              }
+            },
+            {
+              "value": "-2",
+              "label": {
+                "en": "-2 °C",
+                "fr": "-2 °C"
+              }
+            },
+            {
+              "value": "0",
+              "label": {
+                "en": "0 °C",
+                "fr": "0 °C"
+              }
+            },
+            {
+              "value": "2",
+              "label": {
+                "en": "2 °C",
+                "fr": "2 °C"
+              }
+            },
+            {
+              "value": "5",
+              "label": {
+                "en": "5 °C",
+                "fr": "5 °C"
+              }
+            }
+          ]
+        },
+        {
+          "key": "horizon_choice",
+          "type": "select",
+          "required": true,
+          "default": "6",
+          "label": {
+            "en": "Forecast window",
+            "fr": "Période à surveiller"
+          },
+          "description": {
+            "en": "Includes the current hourly interval. Forecast timestamps mark the end of the hour.",
+            "fr": "Inclut l’intervalle horaire en cours. Les dates des prévisions indiquent la fin de l’heure."
+          },
+          "options": [
+            {
+              "value": "1",
+              "label": {
+                "en": "1 hour",
+                "fr": "1 heure"
+              }
+            },
+            {
+              "value": "3",
+              "label": {
+                "en": "3 hours",
+                "fr": "3 heures"
+              }
+            },
+            {
+              "value": "6",
+              "label": {
+                "en": "6 hours",
+                "fr": "6 heures"
+              }
+            },
+            {
+              "value": "12",
+              "label": {
+                "en": "12 hours",
+                "fr": "12 heures"
+              }
+            },
+            {
+              "value": "24",
+              "label": {
+                "en": "24 hours",
+                "fr": "24 heures"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House identifier",
+            "fr": "Identifiant de la maison"
+          }
+        },
+        {
+          "key": "house_name",
+          "type": "string",
+          "label": {
+            "en": "House name",
+            "fr": "Nom de la maison"
+          }
+        },
+        {
+          "key": "location",
+          "type": "string",
+          "label": {
+            "en": "Forecast locality",
+            "fr": "Localité des prévisions"
+          }
+        },
+        {
+          "key": "forecast_at",
+          "type": "string",
+          "label": {
+            "en": "End of first affected hour (UTC)",
+            "fr": "Fin de la première heure concernée (UTC)"
+          }
+        },
+        {
+          "key": "value",
+          "type": "number",
+          "label": {
+            "en": "Forecast value",
+            "fr": "Valeur prévue"
+          }
+        },
+        {
+          "key": "unit",
+          "type": "string",
+          "label": {
+            "en": "Unit",
+            "fr": "Unité"
+          }
+        },
+        {
+          "key": "threshold",
+          "type": "number",
+          "label": {
+            "en": "Threshold",
+            "fr": "Seuil"
+          }
+        },
+        {
+          "key": "horizon_hours",
+          "type": "number",
+          "label": {
+            "en": "Forecast window (hours)",
+            "fr": "Période surveillée (heures)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "heat_expected",
+      "label": {
+        "en": "High temperature expected",
+        "fr": "Forte chaleur prévue"
+      },
+      "description": {
+        "en": "Triggers once when the selected forecast threshold is reached. Another event requires a complete forecast window without this risk first.",
+        "fr": "Déclenche une fois lorsque le seuil choisi apparaît dans les prévisions. Un nouvel événement nécessite d’abord une période complète sans ce risque."
+      },
+      "fields": [
+        {
+          "key": "house",
+          "type": "select",
+          "source": "houses",
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "required": false,
+          "description": {
+            "en": "Leave empty for all located houses.",
+            "fr": "Laissez vide pour toutes les maisons localisées."
+          }
+        },
+        {
+          "key": "threshold_choice",
+          "type": "select",
+          "required": true,
+          "default": "30",
+          "label": {
+            "en": "Temperature at or above",
+            "fr": "Température supérieure ou égale à"
+          },
+          "options": [
+            {
+              "value": "25",
+              "label": {
+                "en": "25 °C",
+                "fr": "25 °C"
+              }
+            },
+            {
+              "value": "28",
+              "label": {
+                "en": "28 °C",
+                "fr": "28 °C"
+              }
+            },
+            {
+              "value": "30",
+              "label": {
+                "en": "30 °C",
+                "fr": "30 °C"
+              }
+            },
+            {
+              "value": "32",
+              "label": {
+                "en": "32 °C",
+                "fr": "32 °C"
+              }
+            },
+            {
+              "value": "35",
+              "label": {
+                "en": "35 °C",
+                "fr": "35 °C"
+              }
+            }
+          ]
+        },
+        {
+          "key": "horizon_choice",
+          "type": "select",
+          "required": true,
+          "default": "6",
+          "label": {
+            "en": "Forecast window",
+            "fr": "Période à surveiller"
+          },
+          "description": {
+            "en": "Includes the current hourly interval. Forecast timestamps mark the end of the hour.",
+            "fr": "Inclut l’intervalle horaire en cours. Les dates des prévisions indiquent la fin de l’heure."
+          },
+          "options": [
+            {
+              "value": "1",
+              "label": {
+                "en": "1 hour",
+                "fr": "1 heure"
+              }
+            },
+            {
+              "value": "3",
+              "label": {
+                "en": "3 hours",
+                "fr": "3 heures"
+              }
+            },
+            {
+              "value": "6",
+              "label": {
+                "en": "6 hours",
+                "fr": "6 heures"
+              }
+            },
+            {
+              "value": "12",
+              "label": {
+                "en": "12 hours",
+                "fr": "12 heures"
+              }
+            },
+            {
+              "value": "24",
+              "label": {
+                "en": "24 hours",
+                "fr": "24 heures"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House identifier",
+            "fr": "Identifiant de la maison"
+          }
+        },
+        {
+          "key": "house_name",
+          "type": "string",
+          "label": {
+            "en": "House name",
+            "fr": "Nom de la maison"
+          }
+        },
+        {
+          "key": "location",
+          "type": "string",
+          "label": {
+            "en": "Forecast locality",
+            "fr": "Localité des prévisions"
+          }
+        },
+        {
+          "key": "forecast_at",
+          "type": "string",
+          "label": {
+            "en": "End of first affected hour (UTC)",
+            "fr": "Fin de la première heure concernée (UTC)"
+          }
+        },
+        {
+          "key": "value",
+          "type": "number",
+          "label": {
+            "en": "Forecast value",
+            "fr": "Valeur prévue"
+          }
+        },
+        {
+          "key": "unit",
+          "type": "string",
+          "label": {
+            "en": "Unit",
+            "fr": "Unité"
+          }
+        },
+        {
+          "key": "threshold",
+          "type": "number",
+          "label": {
+            "en": "Threshold",
+            "fr": "Seuil"
+          }
+        },
+        {
+          "key": "horizon_hours",
+          "type": "number",
+          "label": {
+            "en": "Forecast window (hours)",
+            "fr": "Période surveillée (heures)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "gusts_expected",
+      "label": {
+        "en": "Strong gusts expected",
+        "fr": "Fortes rafales prévues"
+      },
+      "description": {
+        "en": "Triggers once when the selected forecast threshold is reached. Another event requires a complete forecast window without this risk first.",
+        "fr": "Déclenche une fois lorsque le seuil choisi apparaît dans les prévisions. Un nouvel événement nécessite d’abord une période complète sans ce risque."
+      },
+      "fields": [
+        {
+          "key": "house",
+          "type": "select",
+          "source": "houses",
+          "label": {
+            "en": "House",
+            "fr": "Maison"
+          },
+          "required": false,
+          "description": {
+            "en": "Leave empty for all located houses.",
+            "fr": "Laissez vide pour toutes les maisons localisées."
+          }
+        },
+        {
+          "key": "threshold_choice",
+          "type": "select",
+          "required": true,
+          "default": "50",
+          "label": {
+            "en": "Gusts at or above",
+            "fr": "Rafales supérieures ou égales à"
+          },
+          "options": [
+            {
+              "value": "30",
+              "label": {
+                "en": "30 km/h",
+                "fr": "30 km/h"
+              }
+            },
+            {
+              "value": "40",
+              "label": {
+                "en": "40 km/h",
+                "fr": "40 km/h"
+              }
+            },
+            {
+              "value": "50",
+              "label": {
+                "en": "50 km/h",
+                "fr": "50 km/h"
+              }
+            },
+            {
+              "value": "60",
+              "label": {
+                "en": "60 km/h",
+                "fr": "60 km/h"
+              }
+            },
+            {
+              "value": "80",
+              "label": {
+                "en": "80 km/h",
+                "fr": "80 km/h"
+              }
+            },
+            {
+              "value": "100",
+              "label": {
+                "en": "100 km/h",
+                "fr": "100 km/h"
+              }
+            }
+          ]
+        },
+        {
+          "key": "horizon_choice",
+          "type": "select",
+          "required": true,
+          "default": "6",
+          "label": {
+            "en": "Forecast window",
+            "fr": "Période à surveiller"
+          },
+          "description": {
+            "en": "Includes the current hourly interval. Forecast timestamps mark the end of the hour.",
+            "fr": "Inclut l’intervalle horaire en cours. Les dates des prévisions indiquent la fin de l’heure."
+          },
+          "options": [
+            {
+              "value": "1",
+              "label": {
+                "en": "1 hour",
+                "fr": "1 heure"
+              }
+            },
+            {
+              "value": "3",
+              "label": {
+                "en": "3 hours",
+                "fr": "3 heures"
+              }
+            },
+            {
+              "value": "6",
+              "label": {
+                "en": "6 hours",
+                "fr": "6 heures"
+              }
+            },
+            {
+              "value": "12",
+              "label": {
+                "en": "12 hours",
+                "fr": "12 heures"
+              }
+            },
+            {
+              "value": "24",
+              "label": {
+                "en": "24 hours",
+                "fr": "24 heures"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "house",
+          "type": "string",
+          "label": {
+            "en": "House identifier",
+            "fr": "Identifiant de la maison"
+          }
+        },
+        {
+          "key": "house_name",
+          "type": "string",
+          "label": {
+            "en": "House name",
+            "fr": "Nom de la maison"
+          }
+        },
+        {
+          "key": "location",
+          "type": "string",
+          "label": {
+            "en": "Forecast locality",
+            "fr": "Localité des prévisions"
+          }
+        },
+        {
+          "key": "forecast_at",
+          "type": "string",
+          "label": {
+            "en": "End of first affected hour (UTC)",
+            "fr": "Fin de la première heure concernée (UTC)"
+          }
+        },
+        {
+          "key": "value",
+          "type": "number",
+          "label": {
+            "en": "Forecast value",
+            "fr": "Valeur prévue"
+          }
+        },
+        {
+          "key": "unit",
+          "type": "string",
+          "label": {
+            "en": "Unit",
+            "fr": "Unité"
+          }
+        },
+        {
+          "key": "threshold",
+          "type": "number",
+          "label": {
+            "en": "Threshold",
+            "fr": "Seuil"
+          }
+        },
+        {
+          "key": "horizon_hours",
+          "type": "number",
+          "label": {
+            "en": "Forecast window (hours)",
+            "fr": "Période surveillée (heures)"
+          }
+        }
+      ]
+    }
   ]
 }

@@ -8,6 +8,7 @@
 - `src/http.js` : accès limité au domaine officiel et CSV Latin-1 en flux.
 - `src/locations.js` : résolution locale des coordonnées vers les points postaux officiels.
 - `src/forecast.js` : format pivot Gladys, unités, périodes et codes météo.
+- `src/scenes.js` : seuils de prévisions par maison, transitions de risques et état persistant.
 - `src/widgets.js` / `src/i18n.js` : contenu déclaratif et textes bilingues.
 
 Le widget météo natif consomme `onWeatherGet`. Les trois widgets déclarés au manifeste consomment `onWidgetGet` : température, précipitations et vent sur 24 heures. Les prévisions sur huit jours restent fournies au widget météo natif. Aucun appareil factice ni capteur n’est créé. L’accès `location: true` sert à précharger les maisons et à choisir celle des widgets supplémentaires ; les commandes météo natives contiennent déjà les coordonnées.
@@ -17,6 +18,14 @@ Le réglage `location` de chaque widget prend priorité sur `house`. La ville ou
 Les graphiques utilisent un titre limité à la localité et un sous-titre `caption` pour la source et l’heure des prévisions. Gladys affiche ce sous-titre en petit et grisé. Le lien vers le site est disponible dans la configuration.
 
 ## Données
+
+Les quatre `scene_triggers` utilisent `publishSceneEvent` du SDK 0.14.0. Le filtre `house` est un sélecteur dynamique `source: "houses"`, comparé au `selector` de `getHouses()`. Les champs `threshold_choice` et `horizon_choice` sont des listes obligatoires avec valeurs par défaut dans chaque déclencheur. Les filtres de scènes comparent des valeurs exactes et ne transmettent pas leurs règles au fournisseur : celui-ci surveille donc toutes les combinaisons finies proposées au manifeste. Chaque événement porte les deux choix sous forme de chaînes pour le filtrage et les valeurs numériques `threshold` / `horizon_hours` pour les actions. Aucun seuil partagé n’est défini dans `config_schema`. Aucun appareil supplémentaire n’est créé.
+
+Les évaluations s’exécutent après les actualisations, au préchargement des maisons toutes les 15 minutes et lors des reprises après limitation de débit. Elles lisent le cache via `provider.get`, sans ajouter de téléchargement dédié. Elles sont sérialisées et suspendues pendant une déconnexion. Pour chaque risque, toutes les heures de la période doivent être présentes et le paramètre concerné fini. Les rafales du format pivot métrique (m/s) sont reconverties en km/h. Les valeurs exposées sont celles de la première heure atteignant le seuil, pas les extrêmes de la période.
+
+Une transition inactive → active publie un événement, confirmé avant d’enregistrer l’état dans `/data/scene-state.json` par remplacement atomique. Une période complète sans risque réarme le déclencheur ; les erreurs et données périmées ne le réarment pas. L’identité inclut la maison, ses coordonnées, le déclencheur, son seuil et la période. Les états des maisons supprimées et des anciennes coordonnées sont purgés. La surveillance est par combinaison, pas par scène : créer une scène ne rejoue pas un événement déjà émis pour cette combinaison. L’état mémoire reste utilisable si le disque échoue. La livraison n’est pas exactement une fois : une réponse HTTP perdue ou un arrêt entre acceptation et persistance peut entraîner un doublon. L’arrêt attend l’évaluation en cours et empêche de nouvelles publications.
+
+Les tentatives d’envoi sont limitées à 240 par minute glissante, sous la limite du cœur de 300. Le surplus est réévalué après une minute à partir des prévisions courantes, sans file d’événements périmés. Le timer de reprise est annulé à l’arrêt.
 
 Collection : `ch.meteoschweiz.ogd-local-forecasting`.
 
