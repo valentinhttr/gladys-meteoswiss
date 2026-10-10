@@ -32,6 +32,8 @@ jobs:
         id: version
         env:
           RELEASE_TYPE: ${{ inputs.release_type }}
+          # Resolve commit authors to their GitHub handles in the English release notes.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           node scripts/release.js "$RELEASE_TYPE"
           npm run format

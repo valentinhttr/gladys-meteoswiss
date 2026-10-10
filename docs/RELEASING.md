@@ -1,51 +1,97 @@
-# Releases
+# Release runbook
 
-Le dépôt cible est `valentinhttr/gladys-meteoswiss` et l’image est `ghcr.io/valentinhttr/gladys-meteoswiss`.
+Repository: `valentinhttr/gladys-meteoswiss`. Image: `ghcr.io/valentinhttr/gladys-meteoswiss`. Code maintenance: [MAINTENANCE.md](MAINTENANCE.md).
 
-## Première publication
+## Commits and version selection
 
-1. Créer un dépôt GitHub **public** sous ce nom, puis y pousser le projet sur `main`.
-2. Activer GitHub Actions et les permissions nécessaires : `contents: write`, `packages: write`. Une protection de `main` bloquant les pushes du bot doit autoriser ce workflow, ou être adaptée au processus choisi.
-3. Dans **Actions → Release → Run workflow**, sélectionner `main` et **initial**. La version préparée sera `1.0.0`.
-4. Après publication, ouvrir le package GitHub Container Registry et rendre sa visibilité **Public**. GitHub peut créer le premier package privé même si le dépôt est public. Vérifier qu’un `docker pull ghcr.io/valentinhttr/gladys-meteoswiss:1.0.0` fonctionne depuis un environnement sans identifiants GHCR avant de proposer l’installation dans Gladys.
-5. Ajouter le topic GitHub `gladys-assistant-integration` au dépôt pour le référencement automatique dans le catalogue Gladys, conformément au guide développeur.
-
-Le code local est prêt à être publié, mais un manifeste versionné ne suffit pas : l’image doit exister et être accessible anonymement. Ni la création du dépôt distant, ni un push, ni une release ne sont réalisés par les scripts de développement.
-
-## Versions suivantes
-
-Écrire des commits explicites, de préférence au format Conventional Commits :
+Write commit subjects in **English**, using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/):
 
 ```text
-feat: add a forecast widget
-fix: preserve Swiss dates at midnight
-feat!: change a configuration field
-docs: improve installation instructions
+feat(scenes): add forecast triggers
+fix(forecast): preserve Swiss dates at midnight
+perf(provider): reduce parsing allocations
+docs: explain scene thresholds
+feat(api)!: remove a published field
 ```
 
-Relancer **Release** avec `patch`, `minor` ou `major` selon l’impact. La sélection est manuelle ; elle n’est pas déduite automatiquement des commits. Les commits avec `!` sont regroupés dans « Breaking changes / Changements incompatibles ». Les autres sont répartis entre fonctionnalités, corrections et maintenance. Les sujets de commit sont conservés dans leur langue d’origine ; ils ne sont pas traduits automatiquement.
+Describe incompatibilities and migration steps in the commit body. Both `!` in the subject and `BREAKING CHANGE:` / `BREAKING-CHANGE:` in the body mark breaking changes.
 
-Le workflow :
+Choose the release type manually in the **Release** workflow:
 
-1. Installe les dépendances verrouillées, vérifie le manifeste, le style, les tests et les avis de sécurité des dépendances de production.
-2. Met à jour `package.json`, `package-lock.json`, la version et l’image du manifeste.
-3. Génère l’entrée `CHANGELOG.md` et les notes de cette seule release depuis les commits postérieurs au dernier tag.
-4. Crée le commit et le tag localement, puis construit et publie les images `linux/amd64` et `linux/arm64` (Node.js 24 Alpine ne fournit pas d’image ARMv7).
-5. Une fois l’image disponible, pousse **atomiquement** le commit sur `main` et le tag `vX.Y.Z`, puis crée la GitHub Release avec les notes.
+| Type      | When to use                                                         | Example                                    |
+| --------- | ------------------------------------------------------------------- | ------------------------------------------ |
+| `patch`   | Fixes and maintenance without new functionality or breaking changes | 1.2.0 → 1.2.1                              |
+| `minor`   | Backward-compatible functionality (`feat`)                          | 1.2.0 → 1.3.0                              |
+| `major`   | Any breaking change                                                 | 1.2.0 → 2.0.0                              |
+| `initial` | First release only, with no existing version tag                    | Uses the version already in `package.json` |
 
-Le manifeste pointe vers une version précise, jamais `latest`. Une seule release s’exécute à la fois. Le build est dans le même workflow : il ne dépend pas du déclenchement d’un autre workflow par un tag créé avec `GITHUB_TOKEN`.
+The generator refuses a patch for commits containing a feature, and refuses patch/minor for breaking changes. It does not pick a version automatically. A larger bump remains possible when justified. Release commits (`chore(release): ...`) are excluded from the notes.
 
-## Échecs et reprise
+## GitHub release format
 
-- **Tests/build en échec** : pas de nouveau manifeste ni tag distant ; corriger et relancer.
-- **Push refusé** (protection de branche ou nouveau commit concurrent) : le manifeste distant n’a pas changé. Corriger la permission ou repartir du dernier `main`, puis relancer. Une image non référencée peut déjà exister pour la version préparée.
-- **Création de GitHub Release en échec après le push** : le tag et le changelog existent déjà. Créer la release depuis ce tag, avec la section correspondante du changelog. Ne pas refaire un bump uniquement pour réparer cette page.
-- **Image inaccessible dans Gladys** : vérifier d’abord la visibilité publique du package et le tag du manifeste.
+**Titles and notes must be English only.** Use `vX.Y.Z` as the title. The generator produces sections named **Breaking Changes**, **Features**, **Bug Fixes**, **Performance**, **Documentation** and **Maintenance**, omitting empty sections.
 
-Changer de dépôt : `npm run setup:repository -- autre-compte/gladys-meteoswiss`, puis adapter les liens de documentation. Le workflow utilise automatiquement `GITHUB_REPOSITORY` pour les images suivantes.
+Every entry retains its semantic commit subject, links the short hash to the full commit and credits the author. Example structure:
 
-## English quick guide
+```text
+### Features
 
-Create the public repository, push `main`, enable Actions write permissions, then run **Release → initial**. Make the GHCR package public and verify anonymous pulls. Add the `gladys-assistant-integration` repository topic for catalog discovery.
+- feat(scenes): add forecast triggers ([short SHA](commit URL)) by @author
 
-Use Conventional Commit subjects and select patch/minor/major manually for subsequent releases. The workflow synchronizes versions, generates the changelog, publishes the multiarchitecture image, atomically pushes the release commit/tag, and creates the GitHub Release. A failed image build never advances the public manifest. If only release-page creation fails, create it from the existing tag and changelog entry.
+**Full Changelog**: https://github.com/owner/repository/compare/v1.2.0...v1.3.0
+```
+
+The workflow gives the generator `GH_TOKEN` so it can resolve the GitHub account associated with each commit. If lookup is unavailable, the generator uses a GitHub noreply identity when present, otherwise the Git author name. It never invents an account from a display name or publishes author email addresses. Local preparation works without GitHub access.
+
+The generator does not translate subjects: review commits and notes for English before publication. Unknown commit types remain visible under Maintenance. Add any hand-written migration or usage details in English, retaining generated commit references, credits and the comparison link. Forum announcements may be French; keep them separate from GitHub release notes.
+
+## Prepare and publish
+
+1. Review `git status`, the diff, and changes since the latest version tag. Fetch `origin` and tags. Confirm the intended release content is on top of the latest `main`; resolve concurrent changes before proceeding.
+2. Run `npm test`, `npm run check`, `git diff --check`, and `npm audit --omit=dev`. Update relevant documentation and record verification limits in [VALIDATION.md](VALIDATION.md).
+3. Commit the intended changes with English Conventional Commit subjects and push `main`. Check that CI succeeds on Node.js 22 and 24.
+4. Run **Actions → Release → Run workflow**, selecting `main` and the appropriate release type. From the CLI, for example:
+
+   ```sh
+   gh workflow run release.yml --ref main -f release_type=minor
+   ```
+
+5. Wait for the workflow to finish successfully. Inspect the GitHub Release, its notes, tag, manifest image and version. Do not report publication as complete while the build is still running.
+6. Run **Verify public installation** (`gh workflow run verify-install.yml --ref main`). It pulls the manifest's image without registry credentials and checks the installed SDK. Confirm the registry index also contains both `linux/amd64` and `linux/arm64`.
+7. Fast-forward the local checkout from `origin/main`, fetch tags, and confirm the working tree is clean and versions agree. Share the release link and the checks actually completed. A public image smoke check does not prove end-to-end behavior on a real Gladys instance.
+
+Do not manually bump versions before dispatching the workflow. `npm run release:prepare -- minor` changes the local package, lockfile, manifest, changelog and ignored `release-notes.md`; it does not publish. Use an isolated clean checkout to preview notes rather than leaving a prepared bump on `main`.
+
+## Publication ordering and guarantees
+
+The workflow:
+
+1. Installs locked dependencies, validates the manifest/style, runs tests and audits production dependencies.
+2. Generates the next version and English notes from commits after the latest version tag. It updates `package.json`, both lockfile version entries, the integration manifest and `CHANGELOG.md` together.
+3. Creates the release commit and annotated tag locally in CI.
+4. Builds and publishes the versioned image for `linux/amd64` and `linux/arm64`.
+5. Only after the image exists, atomically pushes the release commit and tag, then creates the GitHub Release from `release-notes.md`.
+
+The manifest uses an explicit version, never `latest`. One release runs at a time. Builds run inside the release workflow, not in a separate workflow relying on events from a `GITHUB_TOKEN`-created tag. Node.js 24 Alpine does not provide ARMv7 support.
+
+## Failure recovery
+
+| Failure                                      | Recovery                                                                                                                                                                     |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tests, audit or image build fails            | No new public manifest/tag should exist. Fix the cause, push the correction and rerun after inspecting the failed run.                                                       |
+| Release type is too small                    | Select at least the minimum reported by the generator. Do not hide a breaking marker to pass validation.                                                                     |
+| Atomic push rejected                         | Inspect branch protection or concurrent `main` changes. No partial commit/tag push occurs; an unreferenced image may exist. Resolve the cause and rerun from current `main`. |
+| GitHub Release creation fails after the push | The tag and version commit already exist. Recover the matching changelog section and create the release for that tag; do not bump again.                                     |
+| Author lookup fails                          | Git attribution remains in the notes. Correct the attribution if necessary without changing the version or tag.                                                              |
+| Anonymous image pull fails                   | Check package visibility, image tag and registry publication. A successful authenticated build is not enough.                                                                |
+| Published code has a regression              | Publish a corrective version. Do not move or overwrite a published version tag/image to hide the change.                                                                     |
+
+For a notes-only correction, write the reviewed English Markdown to a file and use `gh release edit vX.Y.Z --notes-file <file>`. Keep the tag, image and version unchanged.
+
+## Initial repository setup
+
+The GitHub repository must be public. Enable Actions with `contents: write` and `packages: write`; branch protection must permit the release bot's version commit. Add the `gladys-assistant-integration` topic for catalog discovery.
+
+After the first publication, make the GHCR package public and verify an anonymous pull before advertising installation. The `initial` workflow selection is only for a repository without version tags.
+
+To change the repository, run `npm run setup:repository -- owner/repository` and update documentation links. In GitHub Actions, `GITHUB_REPOSITORY` determines image and commit URLs. Without it, local preparation uses the owner/repository from the manifest's GHCR image.

@@ -39,4 +39,4 @@ npm test
 npm run check
 ```
 
-[User guide](docs/en.md) · [Guide français](docs/fr.md) · [Releases](docs/RELEASING.md) · [Architecture](docs/ARCHITECTURE.md)
+[User guide](docs/en.md) · [Guide français](docs/fr.md) · [Maintenance](docs/MAINTENANCE.md) · [Releases](docs/RELEASING.md) · [Architecture](docs/ARCHITECTURE.md)

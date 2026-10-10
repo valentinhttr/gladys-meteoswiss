@@ -1,5 +1,12 @@
 # Validation
 
+## Maintenance et génération des releases — 10 octobre 2026
+
+- `npm test` : **50 tests réussis**, dont 8 tests de release exécutés dans des dépôts Git temporaires.
+- Couverture : notes en anglais, liens vers les commits, attribution Git/GitHub, génération initiale/patch/minor/major, détection des changements incompatibles et refus des versions trop petites. Les appels GitHub des tests sont simulés, sans réseau.
+- `npm run check` et `git diff --check` : réussis.
+- Aucun nouveau tag, aucune image et aucune release publiés pour cette modification de l’outillage.
+
 ## Déclencheurs de scènes — 10 octobre 2026
 
 - `npm test` : **43 tests réussis**, dont 17 tests couvrant les seuils, les périodes, les réglages indépendants par scène, le contrat SDK, les données manquantes, la persistance, les reprises et la limitation des événements.

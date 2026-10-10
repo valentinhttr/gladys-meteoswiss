@@ -1,0 +1,67 @@
+# Internal maintenance guide
+
+This guide is for maintainers and coding agents. Read [ARCHITECTURE.md](ARCHITECTURE.md) for data contracts and [RELEASING.md](RELEASING.md) before preparing a release. User instructions live in [en.md](en.md) and [fr.md](fr.md).
+
+## Working on the code
+
+1. Read `git status` and the relevant module and tests. Preserve unrelated changes.
+2. Implement the change and add regression coverage for changed behavior. Keep user-facing strings in English and French.
+3. Run `npm test`, `npm run check`, and `git diff --check`. Before a release, also run `npm audit --omit=dev`.
+4. Update the user guides when behavior changes, the architecture guide when contracts change, and this guide or the release guide when maintenance procedures change.
+5. Use English Conventional Commit subjects. Keep release titles and notes English only; the application and user guides remain bilingual.
+
+Node.js 22 and 24 are tested in CI. Install locked dependencies with `npm ci --ignore-scripts`. Production runs on Node.js 24 Alpine, as the non-root `node` user, with writable persistent storage under `/data`.
+
+## Finding the right module
+
+| Area                                           | Implementation                            | Regression coverage                               |
+| ---------------------------------------------- | ----------------------------------------- | ------------------------------------------------- |
+| Provider startup, status and refresh callbacks | `src/index.js`, `src/integration.js`      | `test/integration.test.js`, `test/scenes.test.js` |
+| Discovery, ingestion, freshness and disk cache | `src/provider.js`                         | `test/provider.test.js`                           |
+| HTTP, CSV streaming and locality resolution    | `src/http.js`, `src/locations.js`         | `test/http-locations.test.js`                     |
+| Weather units, timestamps and conditions       | `src/forecast.js`, `src/constants.js`     | `test/forecast.test.js`                           |
+| Widgets and translations                       | `src/widgets.js`, `src/i18n.js`, manifest | `test/integration.test.js`                        |
+| Scene thresholds, transitions and persistence  | `src/scenes.js`, manifest                 | `test/scenes.test.js`                             |
+| Versioning, changelog and GitHub release notes | `scripts/release.js`, release workflow    | `test/release.test.js`                            |
+
+## Contracts to preserve
+
+- Published widget and trigger keys are stable identifiers. A renamed key breaks existing dashboards or scenes.
+- Scene thresholds and forecast windows belong in each scene's trigger fields. They are predefined choices, not shared integration settings. The runtime evaluates each supported house/threshold/window combination because Gladys filters events by equality and does not send scene subscriptions to the integration.
+- Update both `SCENE_RULES` / `SCENE_HORIZONS` and the manifest when changing scene choices. Keep required choices and defaults consistent. More choices increase event volume; preserve rate limiting, separate transition state and deferred reevaluation tests.
+- A new scene does not replay a risk already reported for its combination. Missing or stale forecasts must not clear active risk state. Never turn absent data into zero.
+- MeteoSwiss hourly timestamps mark the end of the preceding interval. The scene window includes the current interval. Preserve UTC timestamps and Swiss calendar handling, including DST.
+- Source wind speeds are km/h; the metric Gladys pivot uses m/s. Scene gust thresholds use km/h. Do not compare unlike units.
+- All parameters in a snapshot come from one complete model run. National files stream sequentially. Preserve download backoff, cancellation, freshness checks and the 20-locality tracking limit.
+- Official warnings are not implemented. Do not label forecast thresholds as official alerts or treat an unavailable warning feed as “no warnings”. Keep MeteoSwiss attribution and the independent-integration wording.
+
+## Persistence and diagnosis
+
+`/data/forecasts.json` caches forecasts. `/data/scene-state.json` preserves active scene combinations. Writes use temporary files and rename. An unwritable volume falls back to memory with a warning; scene deduplication then cannot survive a restart. Do not delete scene state as a routine repair: doing so may emit active risks again.
+
+| Symptom                               | Check                                                                                                                     |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| First load takes time                 | National forecast files may take several minutes; inspect provider logs before restarting.                                |
+| Unknown or missing locality           | Check house coordinates, Swiss coverage, postcode ambiguity and the tracking limit.                                       |
+| Scenes remain silent                  | Confirm the house, threshold and window; check freshness and complete hourly data. The combination may already be active. |
+| Events repeat after restart           | Check `/data` ownership, persistence and scene-state warnings.                                                            |
+| Events are delayed across many houses | Check the 240-attempts/minute limit; deferred work reevaluates current forecasts after one minute.                        |
+| Old or unavailable forecasts          | Check complete run discovery, HTTP errors and retry backoff; do not mask the failure with fabricated data.                |
+
+Use integration/container logs for diagnosis. Do not publish tokens, credentials, personal house coordinates or raw configuration in issues or release notes.
+
+## Dependencies and external services
+
+The installed npm SDK is the runtime contract. `test/sdk-harness.js` substitutes I/O while exercising the actual SDK. Do not assume helpers from upstream GitHub `main` exist in the installed package.
+
+For an SDK update, review its changelog and update the lockfile, the version guard in `scripts/check.js`, the public-install workflow, test harness and documented compatibility as needed. Refresh `test/fixtures/manifest.schema.json` from the official Gladys schema when using new manifest features; record the source/date and check `gladys_version` against the minimum supported core release.
+
+`npm run smoke` is an optional live upstream check. It downloads national files for Lausanne, Zurich and Geneva; it is not part of routine offline tests and does not exercise a live Gladys scene. Use it when changing data ingestion or resolving an upstream issue, not repeatedly for documentation edits.
+
+## Release maintenance
+
+[RELEASING.md](RELEASING.md) is the publication runbook. Keep the release workflow, generator, tests and runbook aligned. A code or documentation change alone does not require immediate publication.
+
+Release notes use English Conventional Commit subjects, semantic categories, commit links, author attribution and a full changelog link. Review the text for English: the generator does not translate commit messages. Preserve historical release artifacts unless correcting their notes is explicitly part of the task.
+
+Record executed checks and material gaps in [VALIDATION.md](VALIDATION.md). Distinguish SDK tests, registry image checks and end-to-end testing on a real Gladys installation; one does not establish the others.
