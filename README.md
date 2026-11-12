@@ -1,6 +1,6 @@
 # MeteoSwiss for Gladys
 
-Swiss weather forecasts and official MeteoSwiss warnings for **Gladys Assistant 5.1+**, in English and French. No account or API key needed.
+Swiss weather forecasts and official MeteoSwiss warnings for **Gladys Assistant 5.3+**, in English and French. No account or API key needed.
 
 ## Widgets
 
