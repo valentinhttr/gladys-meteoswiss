@@ -7,8 +7,8 @@
     "en": "Swiss forecasts and official MeteoSwiss weather warnings.",
     "fr": "Prévisions suisses et alertes météorologiques officielles MétéoSuisse."
   },
-  "version": "1.3.0",
-  "docker_image": "ghcr.io/valentinhttr/gladys-meteoswiss:1.3.0",
+  "version": "1.4.0",
+  "docker_image": "ghcr.io/valentinhttr/gladys-meteoswiss:1.4.0",
   "gladys_version": ">=5.2.0",
   "categories": ["environment"],
   "transports": ["cloud"],

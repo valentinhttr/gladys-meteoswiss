@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0 (2026-11-19)
+
+### Bug Fixes
+
+- fix(manifest): require Gladys 5.2 for houses and update the SDK ([2aae151](https://github.com/valentinhttr/gladys-meteoswiss/commit/2aae1518b18560621a970d6239fa92df30ac1803)) by @valentinhttr
+
+**Full Changelog**: https://github.com/valentinhttr/gladys-meteoswiss/compare/v1.3.0...v1.4.0
+
 ## 1.3.0 (2026-10-10)
 
 ### Features
