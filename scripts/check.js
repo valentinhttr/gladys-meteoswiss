@@ -9,6 +9,8 @@ const lock = read('package-lock.json');
 const ajv = new Ajv({ strict: false, allErrors: true, validateFormats: false });
 const validate = ajv.compile(read('test/fixtures/manifest.schema.json'));
 if (!validate(manifest)) throw new Error(JSON.stringify(validate.errors));
+if (manifest.gladys_version !== '>=5.2.0')
+  throw new Error('Review the Gladys compatibility floor for the houses source');
 if (
   pkg.version !== manifest.version ||
   pkg.version !== lock.version ||
@@ -17,7 +19,7 @@ if (
 ) {
   throw new Error('Package, lockfile and manifest versions must match');
 }
-if (pkg.dependencies['@gladysassistant/integration-sdk'] !== '0.14.0')
+if (pkg.dependencies['@gladysassistant/integration-sdk'] !== '0.16.1')
   throw new Error('SDK version drift');
 function translations(value) {
   if (!value || typeof value !== 'object') return;

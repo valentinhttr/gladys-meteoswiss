@@ -22,7 +22,7 @@ Les graphiques utilisent un titre limité à la localité et un sous-titre `capt
 
 ## Données
 
-Les quatre déclencheurs de prévisions utilisent `publishSceneEvent` du SDK 0.14.0. Le filtre `house` est un sélecteur dynamique `source: "houses"`, comparé au `selector` de `getHouses()`. Les champs `threshold_choice` et `horizon_choice` sont des listes obligatoires avec valeurs par défaut dans chaque déclencheur. Les filtres de scènes comparent des valeurs exactes et ne transmettent pas leurs règles au fournisseur : celui-ci surveille donc toutes les combinaisons finies proposées au manifeste. Chaque événement porte les deux choix sous forme de chaînes pour le filtrage et les valeurs numériques `threshold` / `horizon_hours` pour les actions. Aucun seuil partagé n’est défini dans `config_schema`. Aucun appareil supplémentaire n’est créé.
+Les quatre déclencheurs de prévisions utilisent `publishSceneEvent` du SDK 0.16.1. Le filtre `house` est un sélecteur dynamique `source: "houses"`, comparé au `selector` de `getHouses()`. Les champs `threshold_choice` et `horizon_choice` sont des listes obligatoires avec valeurs par défaut dans chaque déclencheur. Les filtres de scènes comparent des valeurs exactes et ne transmettent pas leurs règles au fournisseur : celui-ci surveille donc toutes les combinaisons finies proposées au manifeste. Chaque événement porte les deux choix sous forme de chaînes pour le filtrage et les valeurs numériques `threshold` / `horizon_hours` pour les actions. Aucun seuil partagé n’est défini dans `config_schema`. Aucun appareil supplémentaire n’est créé.
 
 Les évaluations s’exécutent après les actualisations, au préchargement des maisons toutes les 15 minutes et lors des reprises après limitation de débit. Elles lisent le cache via `provider.get`, sans ajouter de téléchargement dédié. Elles sont sérialisées et suspendues pendant une déconnexion. Pour chaque risque, toutes les heures de la période doivent être présentes et le paramètre concerné fini. Les rafales du format pivot métrique (m/s) sont reconverties en km/h. Les valeurs exposées sont celles de la première heure atteignant le seuil, pas les extrêmes de la période.
 
@@ -64,7 +64,7 @@ Les alertes utilisent une capacité réservée de 50 tentatives par minute gliss
 
 ## Vérification et limites
 
-Le schéma `test/fixtures/manifest.schema.json` vient du cœur Gladys, consulté le 9 octobre 2026. Le paquet npm SDK **0.14.0** est la référence d’exécution : GitHub `main` contient déjà des aides de tests absentes du paquet publié. Notre adaptateur de test utilise donc le SDK installé et substitue uniquement ses entrées/sorties.
+Le schéma `test/fixtures/manifest.schema.json` vient du cœur Gladys, consulté le 9 octobre 2026. Le paquet npm SDK **0.16.1** est la référence d’exécution. Notre adaptateur de test utilise le SDK installé et substitue uniquement ses entrées/sorties.
 
 Les composants de chaque widget passent par `validateWidgetContent` dans les tests, en français/anglais et unités métriques/américaines. Le test réseau optionnel vérifie Lausanne et Zurich et rapporte le temps de chargement et le pic mémoire. La CI ne télécharge pas les données nationales.
 

@@ -1,8 +1,7 @@
 import { GladysIntegration } from '@gladysassistant/integration-sdk';
 import { silent } from './helpers.js';
 
-// SDK 0.14.0 on npm does not export /testing (GitHub main does).
-// Exercise its actual command dispatch and ACK mapping, replacing only I/O.
+// Exercise the installed SDK’s actual command dispatch and ACK mapping, replacing only I/O.
 export function createTestGladys({ houses = [] } = {}) {
   const gladys = new GladysIntegration({
     hostApiUrl: 'http://127.0.0.1:1443',

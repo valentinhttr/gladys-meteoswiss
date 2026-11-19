@@ -19,6 +19,6 @@ jobs:
             import { GladysIntegration } from "@gladysassistant/integration-sdk";
             const require = createRequire(import.meta.url);
             const sdk = require("@gladysassistant/integration-sdk/package.json");
-            if (sdk.version !== "0.14.0" || typeof GladysIntegration !== "function") process.exit(1);
+            if (sdk.version !== "0.16.1" || typeof GladysIntegration !== "function") process.exit(1);
             console.log("Published image starts correctly; Gladys SDK", sdk.version);
           '

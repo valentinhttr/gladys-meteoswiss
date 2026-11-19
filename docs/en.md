@@ -1,5 +1,7 @@
 # MeteoSwiss
 
+Requires Gladys Assistant 5.2.0 or later.
+
 Use the native Gladys **Weather** widget for the eight-day forecast. Add the temperature, precipitation and wind widgets for hourly charts.
 
 In each widget's settings:

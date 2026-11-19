@@ -51,3 +51,7 @@ Le conteneur a tourné sans droits root, avec racine en lecture seule, toutes le
 - Exécution réelle du workflow GitHub Actions et build croisé de toutes les architectures ; l’image de base a été vérifiée pour AMD64 et ARM64, et le build local a réussi.
 
 La première publication doit suivre [RELEASING.md](RELEASING.md), notamment la visibilité publique du package GHCR.
+
+The manifest compatibility check pins the minimum Gladys version to 5.2.0 for the dynamic `houses` source. Local validation covers the manifest declaration. Store indexing and installation on a running Gladys instance require separate verification.
+
+With SDK 0.16.1, all 63 tests passed and the production dependency audit reported zero vulnerabilities.

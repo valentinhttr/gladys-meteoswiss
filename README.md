@@ -1,6 +1,6 @@
 # MeteoSwiss for Gladys
 
-Swiss weather forecasts and official MeteoSwiss warnings for **Gladys Assistant 5.1+**, in English and French. No account or API key needed.
+Swiss weather forecasts and official MeteoSwiss warnings for **Gladys Assistant 5.2+**, in English and French. No account or API key needed.
 
 ## Widgets
 
@@ -33,7 +33,7 @@ This is an independent community integration. It is **not an official service** 
 
 ## Development
 
-Node.js 22/24 · Gladys SDK **0.14.0** · [MIT](LICENSE).
+Node.js 22/24 · Gladys SDK **0.16.1** · [MIT](LICENSE).
 
 ```sh
 npm ci
