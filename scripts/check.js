@@ -9,8 +9,10 @@ const lock = read('package-lock.json');
 const ajv = new Ajv({ strict: false, allErrors: true, validateFormats: false });
 const validate = ajv.compile(read('test/fixtures/manifest.schema.json'));
 if (!validate(manifest)) throw new Error(JSON.stringify(validate.errors));
-if (manifest.gladys_version !== '>=5.2.0')
-  throw new Error('Review the Gladys compatibility floor for the houses source');
+if (manifest.gladys_version !== '>=5.3.0')
+  throw new Error(
+    'Review the Gladys compatibility floor for the catalog countries and the houses source',
+  );
 if (
   pkg.version !== manifest.version ||
   pkg.version !== lock.version ||

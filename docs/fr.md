@@ -1,6 +1,6 @@
 # Météo Suisse
 
-Cette intégration nécessite Gladys Assistant 5.2.0 ou une version ultérieure.
+Cette intégration nécessite Gladys Assistant 5.3.0 ou une version ultérieure.
 
 Utilisez le widget **Météo** natif de Gladys pour les prévisions sur huit jours. Les widgets température, précipitations et vent affichent les courbes horaires.
 

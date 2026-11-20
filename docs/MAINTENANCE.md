@@ -27,7 +27,7 @@ Node.js 22 and 24 are tested in CI. Install locked dependencies with `npm ci --i
 
 ## Contracts to preserve
 
-- The dynamic `houses` source requires Gladys 5.2.0 or later. Keep the manifest, compatibility check and user guides in sync when raising the minimum.
+- The catalog `countries` require Gladys 5.3.0 or later (the dynamic `houses` source, 5.2.0). Keep the manifest, compatibility check and user guides in sync when raising the minimum.
 - Published widget and trigger keys are stable identifiers. A renamed key breaks existing dashboards or scenes.
 - Scene thresholds and forecast windows belong in each scene's trigger fields. They are predefined choices, not shared integration settings. The runtime evaluates each supported house/threshold/window combination because Gladys filters events by equality and does not send scene subscriptions to the integration.
 - Update both `SCENE_RULES` / `SCENE_HORIZONS` and the manifest when changing scene choices. Keep required choices and defaults consistent. More choices increase event volume; preserve rate limiting, separate transition state and deferred reevaluation tests.
